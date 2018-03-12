@@ -17,7 +17,7 @@
     Plug 'junegunn/seoul256.vim'
     Plug 'morhetz/gruvbox'
     Plug 'nathanaelkane/vim-indent-guides'
-    Plug 'python-mode/python-mode'
+    "Plug 'python-mode/python-mode'
     Plug 'scrooloose/nerdcommenter'
     Plug 'scrooloose/nerdtree'
     Plug 'tmhedberg/SimpylFold'
@@ -25,6 +25,7 @@
     Plug 'tpope/vim-sensible'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
+    Plug 'vim-syntastic/syntastic'
     " Python mode is not stable yet
     " Plug 'python-mode/python-mode'
     " List ends here. Plugins become visible to Vim after this call.
@@ -520,7 +521,17 @@
             let g:airline_right_sep='‹' " Slightly fancier than '<'
         endif
     " }
-    "
+
+    " vim-syntastic {
+        set statusline+=%#warningmsg#
+        set statusline+=%{SyntasticStatuslineFlag()}
+        set statusline+=%*
+
+        let g:syntastic_always_populate_loc_list = 1
+        let g:syntastic_auto_loc_list = 1
+        let g:syntastic_check_on_open = 1
+        let g:syntastic_check_on_wq = 0
+    " }
 "}
 
 " Functions {
