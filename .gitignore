@@ -1,0 +1,12 @@
+**/*~
+cache/*
+config/*
+
+vimbackup/*
+vimswap/*
+vimundo/*
+vimviews/*
+.netrwhist
+plugged/*
+spell/*
+
