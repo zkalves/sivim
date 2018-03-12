@@ -25,6 +25,8 @@
     Plug 'tpope/vim-sensible'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
+    " Python mode is not stable yet
+    " Plug 'python-mode/python-mode'
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
 "" }
@@ -213,12 +215,12 @@
     "   let g:sivim_edit_config_mapping='<leader>ec'
     "   let g:sivim_apply_config_mapping='<leader>sc'
     if !exists('g:sivim_edit_config_mapping')
-        let s:sivim_edit_config_mapping = '<leader>ev'
+        let s:sivim_edit_config_mapping = '<leader>ec'
     else
         let s:sivim_edit_config_mapping = g:sivim_edit_config_mapping
     endif
     if !exists('g:sivim_apply_config_mapping')
-        let s:sivim_apply_config_mapping = '<leader>sv'
+        let s:sivim_apply_config_mapping = '<leader>sc'
     else
         let s:sivim_apply_config_mapping = g:sivim_apply_config_mapping
     endif
@@ -574,6 +576,24 @@
     " e.g. Grep current file for <search_term>: Shell grep -Hn <search_term> %
     " }
 
+    function! s:ExpandFilenameAndExecute(command, file)
+        execute a:command . " " . expand(a:file, ":p")
+    endfunction
+
+    function! s:EditSiVimConfig()
+        call <SID>ExpandFilenameAndExecute("tabedit", "~/.sivim/init.vim")
+
+        execute bufwinnr(".sivim/init.vim") . "wincmd w"
+
+        call <SID>ExpandFilenameAndExecute("vsplit", "~/.sivim/config/init.before.vim")
+        wincmd l
+        call <SID>ExpandFilenameAndExecute("split", "~/.sivim/config/init.after.vim")
+
+        execute bufwinnr("~/.sivim/config/init.before.vim") . "wincmd w"
+    endfunction
+
+    execute "noremap " . s:sivim_edit_config_mapping "    :call <SID>EditSiVimConfig()<CR>"
+    execute "noremap " . s:sivim_apply_config_mapping . " :source $MYVIMRC<CR>"
 " }
 
 " Use after config if available {
