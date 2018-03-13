@@ -45,7 +45,30 @@
             set background=dark
         endif
     endfunction
-    noremap <leader>bg :call ToggleBG()<CR>
+
+    function! SwitchCTRST()
+        let s:tbg = &background
+        if s:tbg == "dark"
+            let s:sctrst = g:gruvbox_contrast_dark
+        else
+            let s:sctrst = g:gruvbox_contrast_light
+        endif
+
+        if s:sctrst == "medium"
+            let s:sctrst = 'soft'
+        elseif s:sctrst == "soft"
+            let s:sctrst = 'hard'
+        else
+            let s:sctrst = 'medium'
+        endif
+
+        if s:tbg == "dark"
+            let g:gruvbox_contrast_dark = s:sctrst
+        else
+            let g:gruvbox_contrast_light = s:sctrst
+        endif
+        colorscheme gruvbox
+    endfunction
 
     set mouse=a                 " Automatically enable mouse usage
     set mousehide               " Hide the mouse cursor while typing
@@ -77,10 +100,11 @@
     set iskeyword-=.                    " '.' is an end of word designator
     set iskeyword-=#                    " '#' is an end of word designator
     set iskeyword-=-                    " '-' is an end of word designator
+    set listchars=tab:›\ ,trail:•,extends:#,nbsp:. " Highlight problematic whitespace
 
     " Instead of reverting the cursor to the last position in the buffer, we
     " set it to the first line when editing a git commit message
-    au FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
+    autocmd FileType gitcommit au! BufEnter COMMIT_EDITMSG call setpos('.', [0, 1, 1, 0])
 
     " http://vim.wikia.com/wiki/Restore_cursor_to_file_position_in_previous_editing_session
     " Restore cursor to file position in previous editing session
@@ -171,7 +195,7 @@
     " To disable the stripping of whitespace, add the following to your
     " ~/.sivim/config/init.before.vim file:
     "   let g:sivim_keep_trailing_whitespace = 1
-    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql autocmd BufWritePre <buffer> if !exists('g:sivim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
+    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql,verilog,systemverilog autocmd BufWritePre <buffer> if !exists('g:sivim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
     "autocmd FileType go autocmd BufWritePre <buffer> Fmt
     autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
     autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
@@ -186,7 +210,7 @@
 
     " Flag unnecessary whitespace
     highlight BadWhitespace ctermbg=red guibg=darkred
-    au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+    autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 " }
 
 " Key (re)Mappings {
@@ -205,6 +229,10 @@
     else
         let maplocalleader=g:sivim_localleader
     endif
+
+    " Change background color
+    noremap <leader>bg :call ToggleBG()<CR>
+    noremap <leader>bc :call SwitchCTRST()<CR>
 
     " The default mappings for editing and applying the sivim configuration
     " are <leader>ev and <leader>sv respectively. Change them to your preference
