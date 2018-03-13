@@ -26,17 +26,13 @@
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'vim-syntastic/syntastic'
+    Plug 'jeetsukumaran/vim-buffergator'
+    Plug 'kien/ctrlp.vim'
     " Python mode is not stable yet
     " Plug 'python-mode/python-mode'
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
 "" }
-
-" This avoids strange characters when switching modes {
-    if !has('gui_running')
-        set guicursor=
-    endif
-" }
 
 " General {
     " Allow to trigger background
@@ -531,6 +527,51 @@
         let g:syntastic_auto_loc_list = 1
         let g:syntastic_check_on_open = 1
         let g:syntastic_check_on_wq = 0
+    " }
+
+    " ctrlp {
+        " Setup some default ignores
+        let g:ctrlp_custom_ignore = {
+                    \ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
+                    \ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
+                    \}
+
+        " Use the nearest .git directory as the cwd
+        " This makes a lot of sense if you are working on a project that is in version
+        " control. It also supports works with .svn, .hg, .bzr.
+        let g:ctrlp_working_path_mode = 'r'
+
+        " Use a leader instead of the actual named binding
+        nmap <leader>p :CtrlP<cr>
+
+        " Easy bindings for its various modes
+        nmap <leader>bb :CtrlPBuffer<cr>
+        nmap <leader>bm :CtrlPMixed<cr>
+        nmap <leader>bs :CtrlPMRU<cr>
+    " }
+
+    " buffergator {
+        " Use the right side of the screen
+        let g:buffergator_viewport_split_policy = 'R'
+
+        " I want my own keymappings...
+        let g:buffergator_suppress_keymaps = 1
+
+        " Looper buffers
+        "let g:buffergator_mru_cycle_loop = 1
+
+        " Go to the previous buffer open
+        nmap <leader>jj :BuffergatorMruCyclePrev<cr>
+
+        " Go to the next buffer open
+        nmap <leader>kk :BuffergatorMruCycleNext<cr>
+
+        " View the entire list of buffers open
+        nmap <leader>bl :BuffergatorOpen<cr>
+
+        " Shared bindings from Solution #1 from earlier
+        nmap <leader>T :enew<cr>
+        nmap <leader>bq :bp <BAR> bd #<cr>
     " }
 "}
 
