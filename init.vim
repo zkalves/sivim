@@ -14,22 +14,18 @@
     call plug#begin('~/.sivim/plugged')
     " Declare the list of plugins.
     Plug 'godlygeek/tabular'
-    Plug 'junegunn/seoul256.vim'
     Plug 'morhetz/gruvbox'
     Plug 'nathanaelkane/vim-indent-guides'
     "Plug 'python-mode/python-mode'
     Plug 'scrooloose/nerdcommenter'
-    Plug 'scrooloose/nerdtree'
     Plug 'tmhedberg/SimpylFold'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-sensible'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'vim-syntastic/syntastic'
-    Plug 'jeetsukumaran/vim-buffergator'
     Plug 'kien/ctrlp.vim'
-    " Python mode is not stable yet
-    " Plug 'python-mode/python-mode'
+    Plug 'easymotion/vim-easymotion'
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
 "" }
@@ -442,23 +438,6 @@
 " }
 
 " Plugins {
-    " NerdTree {
-        if isdirectory(expand("~/.sivim/plugged/nerdtree"))
-            map <C-e> <plug>NERDTreeTabsToggle<CR>
-            map <leader>e :NERDTreeFind<CR>
-            nmap <leader>nt :NERDTreeFind<CR>
-
-            let NERDTreeShowBookmarks=1
-            let NERDTreeIgnore=['\.py[cd]$', '\~$', '\.swo$', '\.swp$', '^\.git$', '^\.hg$', '^\.svn$', '\.bzr$']
-            let NERDTreeChDirMode=0
-            let NERDTreeQuitOnOpen=1
-            let NERDTreeMouseMode=2
-            let NERDTreeShowHidden=1
-            let NERDTreeKeepTreeInNewTab=1
-            let g:nerdtree_tabs_open_on_gui_startup=0
-        endif
-    " }
-
     " Tabularize {
         if isdirectory(expand("~/.sivim/plugged/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
@@ -578,46 +557,9 @@
         nmap <leader>bs :CtrlPMRU<cr>
     " }
 
-    " buffergator {
-        " Use the right side of the screen
-        let g:buffergator_viewport_split_policy = 'R'
-
-        " I want my own keymappings...
-        let g:buffergator_suppress_keymaps = 1
-
-        " Looper buffers
-        "let g:buffergator_mru_cycle_loop = 1
-
-        " Go to the previous buffer open
-        nmap <leader>jj :BuffergatorMruCyclePrev<cr>
-
-        " Go to the next buffer open
-        nmap <leader>kk :BuffergatorMruCycleNext<cr>
-
-        " View the entire list of buffers open
-        nmap <leader>bl :BuffergatorOpen<cr>
-
-        " Shared bindings from Solution #1 from earlier
-        nmap <leader>T :enew<cr>
-        nmap <leader>bq :bp <BAR> bd #<cr>
-    " }
 "}
 
 " Functions {
-
-    " Initialize NERDTree as needed {
-    function! NERDTreeInitAsNeeded()
-        redir => bufoutput
-        buffers!
-        redir END
-        let idx = stridx(bufoutput, "NERD_tree")
-        if idx > -1
-            NERDTreeMirror
-            NERDTreeFind
-            wincmd l
-        endif
-    endfunction
-    " }
 
     " Strip whitespace {
     function! StripTrailingWhitespace()
