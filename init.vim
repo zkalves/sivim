@@ -13,23 +13,19 @@
     " Plugins will be downloaded under the specified directory.
     call plug#begin('~/.sivim/plugged')
     " Declare the list of plugins.
-    Plug 'godlygeek/tabular'
-    Plug 'junegunn/seoul256.vim'
-    Plug 'morhetz/gruvbox'
-    Plug 'nathanaelkane/vim-indent-guides'
-    "Plug 'python-mode/python-mode'
-    Plug 'scrooloose/nerdcommenter'
-    Plug 'scrooloose/nerdtree'
-    Plug 'tmhedberg/SimpylFold'
-    Plug 'tpope/vim-fugitive'
-    Plug 'tpope/vim-sensible'
-    Plug 'vim-airline/vim-airline'
-    Plug 'vim-airline/vim-airline-themes'
-    Plug 'vim-syntastic/syntastic'
-    Plug 'jeetsukumaran/vim-buffergator'
-    Plug 'kien/ctrlp.vim'
-    " Python mode is not stable yet
-    " Plug 'python-mode/python-mode'
+    Plug 'morhetz/gruvbox'                      " Default colorscheme
+    Plug 'godlygeek/tabular'                    " Text alignment
+    Plug 'nathanaelkane/vim-indent-guides'      " Visually display indent levels
+    "Plug 'python-mode/python-mode'             " Convert neovim in a Python IDE
+    Plug 'scrooloose/nerdcommenter'             " Comment functions
+    Plug 'tmhedberg/SimpylFold'                 " Code folding for python
+    Plug 'tpope/vim-fugitive'                   " Git wrapper
+    Plug 'tpope/vim-sensible'                   " Basic configs
+    Plug 'vim-airline/vim-airline'              " status line
+    Plug 'vim-airline/vim-airline-themes'       " Themes for airline
+    Plug 'vim-syntastic/syntastic'              " Syntax checker
+    Plug 'easymotion/vim-easymotion'            " Move easier through the code
+
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
 "" }
@@ -537,12 +533,39 @@
         " See `:echo g:airline_theme_map` for some more choices
         " Default in terminal vim is 'dark'
         if isdirectory(expand("~/.sivim/plugged/vim-airline-themes/"))
+            let g:airline_powerline_fonts = 1
             if !exists('g:airline_theme')
                 let g:airline_theme = 'dark'
             endif
-            " Use the default set of separators with a few customizations
-            let g:airline_left_sep='›'  " Slightly fancier than '>'
-            let g:airline_right_sep='‹' " Slightly fancier than '<'
+            if !exists('g:airline_symbols')
+                let g:airline_symbols = {}
+            endif
+
+            " unicode symbols
+            let g:airline_left_sep = '»'
+            let g:airline_left_sep = '▶'
+            let g:airline_right_sep = '«'
+            let g:airline_right_sep = '◀'
+            let g:airline_symbols.linenr = '␊'
+            let g:airline_symbols.linenr = '␤'
+            let g:airline_symbols.linenr = '¶'
+            let g:airline_symbols.branch = '⎇'
+            let g:airline_symbols.paste = 'ρ'
+            let g:airline_symbols.paste = 'Þ'
+            let g:airline_symbols.paste = '∥'
+            let g:airline_symbols.whitespace = 'Ξ'
+
+            " airline symbols
+            let g:airline_left_sep = ''
+            let g:airline_left_alt_sep = ''
+            let g:airline_right_sep = ''
+            let g:airline_right_alt_sep = ''
+            let g:airline_symbols.branch = ''
+            let g:airline_symbols.readonly = ''
+            let g:airline_symbols.linenr = ''
+            "" Use the default set of separators with a few customizations
+            "let g:airline_left_sep='›'  " Slightly fancier than '>'
+            "let g:airline_right_sep='‹' " Slightly fancier than '<'
         endif
     " }
 
@@ -578,29 +601,6 @@
         nmap <leader>bs :CtrlPMRU<cr>
     " }
 
-    " buffergator {
-        " Use the right side of the screen
-        let g:buffergator_viewport_split_policy = 'R'
-
-        " I want my own keymappings...
-        let g:buffergator_suppress_keymaps = 1
-
-        " Looper buffers
-        "let g:buffergator_mru_cycle_loop = 1
-
-        " Go to the previous buffer open
-        nmap <leader>jj :BuffergatorMruCyclePrev<cr>
-
-        " Go to the next buffer open
-        nmap <leader>kk :BuffergatorMruCycleNext<cr>
-
-        " View the entire list of buffers open
-        nmap <leader>bl :BuffergatorOpen<cr>
-
-        " Shared bindings from Solution #1 from earlier
-        nmap <leader>T :enew<cr>
-        nmap <leader>bq :bp <BAR> bd #<cr>
-    " }
 "}
 
 " Functions {
