@@ -9,9 +9,9 @@
     endif
 " }
 
-"" dein plugin manager {
+"" Plugin manager {
     " Plugins will be downloaded under the specified directory.
-    set runtimepath+=~/.sivim/plugins/dein.vim
+    set runtimepath+=~/.sivim/plugins/repos/github.com/Shougo/dein.vim
     if dein#load_state('~/.sivim/plugins')
         call dein#begin('~/.sivim/plugins')
         call dein#add('Shougo/dein.vim')
@@ -39,6 +39,7 @@
         call dein#save_state()
     endif
 
+    " Install missing plugins
     if dein#check_install()
         call dein#install()
     endif
@@ -239,6 +240,9 @@
     else
         let maplocalleader=g:sivim_localleader
     endif
+
+    " Update plugins on startup
+    noremap <leader>du :call dein#update()<CR>
 
     " Change background color
     noremap <leader>bg :call ToggleBG()<CR>
@@ -451,26 +455,9 @@
     nmap <F1> <nop>
 " }
 
-" Plugins {
-    " NerdTree {
-        if isdirectory(expand("~/.sivim/plugins/nerdtree"))
-            map <C-e> <plug>NERDTreeTabsToggle<CR>
-            map <leader>e :NERDTreeFind<CR>
-            nmap <leader>nt :NERDTreeFind<CR>
-
-            let NERDTreeShowBookmarks=1
-            let NERDTreeIgnore=['\.py[cd]$', '\~$', '\.swo$', '\.swp$', '^\.git$', '^\.hg$', '^\.svn$', '\.bzr$']
-            let NERDTreeChDirMode=0
-            let NERDTreeQuitOnOpen=1
-            let NERDTreeMouseMode=2
-            let NERDTreeShowHidden=1
-            let NERDTreeKeepTreeInNewTab=1
-            let g:nerdtree_tabs_open_on_gui_startup=0
-        endif
-    " }
-
+" Plugin configuration {
     " Tabularize {
-        if isdirectory(expand("~/.sivim/plugins/tabular"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/godlygeek/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
@@ -496,7 +483,7 @@
             let g:pymode = 0
         endif
 
-        if isdirectory(expand("~/.sivim/plugins/python-mode"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/python-mode"))
             let g:pymode_lint_checkers = ['pyflakes']
             let g:pymode_trim_whitespaces = 0
             let g:pymode_options = 0
@@ -505,7 +492,7 @@
     " }
 
     " Fugitive {
-        if isdirectory(expand("~/.sivim/plugins/vim-fugitive"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-fugitive"))
             nnoremap <silent> <leader>gs :Gstatus<CR>
             nnoremap <silent> <leader>gd :Gdiff<CR>
             nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -521,16 +508,8 @@
         endif
     "}
 
-    " UndoTree {
-        if isdirectory(expand("~/.sivim/plugins/undotree"))
-            nnoremap <Leader>u :UndotreeToggle<CR>
-            " If undotree is opened, it is likely one wants to interact with it.
-            let g:undotree_SetFocusWhenToggle=1
-        endif
-    " }
-
     " indent_guides {
-        if isdirectory(expand("~/.sivim/plugins/vim-indent-guides/"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/nathanaelkane/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
             let g:indent_guides_enable_on_vim_startup = 1
@@ -546,7 +525,7 @@
 
         " See `:echo g:airline_theme_map` for some more choices
         " Default in terminal vim is 'dark'
-        if isdirectory(expand("~/.sivim/plugins/vim-airline-themes/"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-airline/vim-airline-themes/"))
             let g:airline_powerline_fonts = 1
             if !exists('g:airline_theme')
                 let g:airline_theme = 'dark'
@@ -679,20 +658,6 @@
         endfor
     endfunction
     call InitializeDirectories()
-    " }
-
-    " Initialize NERDTree as needed {
-    function! NERDTreeInitAsNeeded()
-        redir => bufoutput
-        buffers!
-        redir END
-        let idx = stridx(bufoutput, "NERD_tree")
-        if idx > -1
-            NERDTreeMirror
-            NERDTreeFind
-            wincmd l
-        endif
-    endfunction
     " }
 
     " Strip whitespace {

@@ -108,9 +108,9 @@ install_vim () {
 # install_package_manager {{{
 install_package_manager () {
   # dein package manager
-  if [[ ! -d "$HOME/.sivim/plugins/dein.vim" ]]; then
+  if [[ ! -d "$HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim" ]]; then
     info "Install dein.vim"
-    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/plugins/dein.vim
+    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim
     success "dein.vim installation done"
   fi
 
@@ -258,13 +258,13 @@ usage () {
 
 # install_vim_plugins {{{
 install_vim_plugins () {
-   vim +PlugUpdate +qa
+   vim +qall!
 }
 # }}}
 
 # install_neovim_plugins {{{
 install_neovim_plugins () {
-   nvim +qa
+   nvim +qall!
 }
 # }}}
 
