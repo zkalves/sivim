@@ -29,7 +29,7 @@
         call dein#add('vim-syntastic/syntastic')             " Syntax checker
         call dein#add('easymotion/vim-easymotion')           " Move easier through the code
         " Unite dependencies:
-        call dein#add('Shougo/vimproc.vim')
+        call dein#add('Shougo/vimproc.vim', {'build': 'make'})
         call dein#add('Shougo/unite.vim')
         call dein#add('Shougo/neomru.vim')
         call dein#add('Shougo/unite-outline')
