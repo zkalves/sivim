@@ -9,30 +9,39 @@
     endif
 " }
 
-"" Vim-Plug {
+"" dein plugin manager {
     " Plugins will be downloaded under the specified directory.
-    call plug#begin('~/.sivim/plugged')
-    " Declare the list of plugins.
-    Plug 'morhetz/gruvbox'                      " Default colorscheme
-    Plug 'godlygeek/tabular'                    " Text alignment
-    Plug 'nathanaelkane/vim-indent-guides'      " Visually display indent levels
-    "Plug 'python-mode/python-mode'             " Convert neovim in a Python IDE
-    Plug 'scrooloose/nerdcommenter'             " Comment functions
-    Plug 'tmhedberg/SimpylFold'                 " Code folding for python
-    Plug 'tpope/vim-fugitive'                   " Git wrapper
-    Plug 'tpope/vim-sensible'                   " Basic configs
-    Plug 'vim-airline/vim-airline'              " status line
-    Plug 'vim-airline/vim-airline-themes'       " Themes for airline
-    Plug 'vim-syntastic/syntastic'              " Syntax checker
-    Plug 'easymotion/vim-easymotion'            " Move easier through the code
-    " Unite dependencies:
-    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
-    Plug 'Shougo/unite.vim'
-    Plug 'Shougo/neomru.vim'
-    Plug 'Shougo/unite-outline'
-    Plug 'tsukkee/unite-tag'
-    " List ends here. Plugins become visible to Vim after this call.
-    call plug#end()
+    set runtimepath+=~/.sivim/plugins/dein.vim
+    if dein#load_state('~/.sivim/plugins')
+        call dein#begin('~/.sivim/plugins')
+        call dein#add('Shougo/dein.vim')
+        " Declare the list of plugins.
+        call dein#add('morhetz/gruvbox')                     " Default colorscheme
+        call dein#add('godlygeek/tabular')                   " Text alignment
+        call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
+        "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
+        call dein#add('scrooloose/nerdcommenter')            " Comment functions
+        call dein#add('tmhedberg/SimpylFold')                " Code folding for python
+        call dein#add('tpope/vim-fugitive')                  " Git wrapper
+        call dein#add('tpope/vim-sensible')                  " Basic configs
+        call dein#add('vim-airline/vim-airline')             " status line
+        call dein#add('vim-airline/vim-airline-themes')      " Themes for airline
+        call dein#add('vim-syntastic/syntastic')             " Syntax checker
+        call dein#add('easymotion/vim-easymotion')           " Move easier through the code
+        " Unite dependencies:
+        call dein#add('Shougo/vimproc.vim')
+        call dein#add('Shougo/unite.vim')
+        call dein#add('Shougo/neomru.vim')
+        call dein#add('Shougo/unite-outline')
+        call dein#add('tsukkee/unite-tag')
+        " List ends here. Plugins become visible to Vim after this call.
+        call dein#end()
+        call dein#save_state()
+    endif
+
+    if dein#check_install()
+        call dein#install()
+    endif
 "" }
 
 " General {
@@ -444,7 +453,7 @@
 
 " Plugins {
     " NerdTree {
-        if isdirectory(expand("~/.sivim/plugged/nerdtree"))
+        if isdirectory(expand("~/.sivim/plugins/nerdtree"))
             map <C-e> <plug>NERDTreeTabsToggle<CR>
             map <leader>e :NERDTreeFind<CR>
             nmap <leader>nt :NERDTreeFind<CR>
@@ -461,7 +470,7 @@
     " }
 
     " Tabularize {
-        if isdirectory(expand("~/.sivim/plugged/tabular"))
+        if isdirectory(expand("~/.sivim/plugins/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
@@ -487,7 +496,7 @@
             let g:pymode = 0
         endif
 
-        if isdirectory(expand("~/.sivim/plugged/python-mode"))
+        if isdirectory(expand("~/.sivim/plugins/python-mode"))
             let g:pymode_lint_checkers = ['pyflakes']
             let g:pymode_trim_whitespaces = 0
             let g:pymode_options = 0
@@ -496,7 +505,7 @@
     " }
 
     " Fugitive {
-        if isdirectory(expand("~/.sivim/plugged/vim-fugitive"))
+        if isdirectory(expand("~/.sivim/plugins/vim-fugitive"))
             nnoremap <silent> <leader>gs :Gstatus<CR>
             nnoremap <silent> <leader>gd :Gdiff<CR>
             nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -513,7 +522,7 @@
     "}
 
     " UndoTree {
-        if isdirectory(expand("~/.sivim/plugged/undotree"))
+        if isdirectory(expand("~/.sivim/plugins/undotree"))
             nnoremap <Leader>u :UndotreeToggle<CR>
             " If undotree is opened, it is likely one wants to interact with it.
             let g:undotree_SetFocusWhenToggle=1
@@ -521,7 +530,7 @@
     " }
 
     " indent_guides {
-        if isdirectory(expand("~/.sivim/plugged/vim-indent-guides/"))
+        if isdirectory(expand("~/.sivim/plugins/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
             let g:indent_guides_enable_on_vim_startup = 1
@@ -537,7 +546,7 @@
 
         " See `:echo g:airline_theme_map` for some more choices
         " Default in terminal vim is 'dark'
-        if isdirectory(expand("~/.sivim/plugged/vim-airline-themes/"))
+        if isdirectory(expand("~/.sivim/plugins/vim-airline-themes/"))
             let g:airline_powerline_fonts = 1
             if !exists('g:airline_theme')
                 let g:airline_theme = 'dark'
