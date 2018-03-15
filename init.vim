@@ -605,6 +605,49 @@
 
 " Functions {
 
+    " Initialize directories {
+    function! InitializeDirectories()
+        let parent = $HOME . '/.sivim'
+        let prefix = 'vim'
+        let dir_list = {
+                    \ 'backup': 'backupdir',
+                    \ 'views': 'viewdir',
+                    \ 'swap': 'directory' }
+
+        if has('persistent_undo')
+            let dir_list['undo'] = 'undodir'
+        endif
+
+        " To specify a different directory in which to place the vimbackup,
+        " vimviews, vimundo, and vimswap files/directories, add the following to
+        " your .sivim/config/init.before.vim file:
+        "   let g:sivim_consolidated_directory = <full path to desired directory>
+        "   eg: let g:sivim_consolidated_directory = $HOME . '/.sivim/'
+        if exists('g:sivim_consolidated_directory')
+            let common_dir = g:sivim_consolidated_directory . prefix
+        else
+            let common_dir = parent . '/' . prefix
+        endif
+
+        for [dirname, settingname] in items(dir_list)
+            let directory = common_dir . dirname . '/'
+            if exists("*mkdir")
+                if !isdirectory(directory)
+                    call mkdir(directory)
+                endif
+            endif
+            if !isdirectory(directory)
+                echo "Warning: Unable to create backup directory: " . directory
+                echo "Try: mkdir -p " . directory
+            else
+                let directory = substitute(directory, " ", "\\\\ ", "g")
+                exec "set " . settingname . "=" . directory
+            endif
+        endfor
+    endfunction
+    call InitializeDirectories()
+    " }
+
     " Initialize NERDTree as needed {
     function! NERDTreeInitAsNeeded()
         redir => bufoutput
@@ -656,6 +699,7 @@
     " e.g. Grep current file for <search_term>: Shell grep -Hn <search_term> %
     " }
 
+    " Edit and source config files {
     function! s:ExpandFilenameAndExecute(command, file)
         execute a:command . " " . expand(a:file, ":p")
     endfunction
@@ -674,6 +718,7 @@
 
     execute "noremap " . s:sivim_edit_config_mapping "    :call <SID>EditSiVimConfig()<CR>"
     execute "noremap " . s:sivim_apply_config_mapping . " :source $MYVIMRC<CR>"
+    " }
 " }
 
 " Use after config if available {
