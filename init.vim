@@ -25,7 +25,12 @@
     Plug 'vim-airline/vim-airline-themes'       " Themes for airline
     Plug 'vim-syntastic/syntastic'              " Syntax checker
     Plug 'easymotion/vim-easymotion'            " Move easier through the code
-
+    " Unite dependencies:
+    Plug 'Shougo/vimproc.vim', { 'do': 'make' }
+    Plug 'Shougo/unite.vim'
+    Plug 'Shougo/neomru.vim'
+    Plug 'Shougo/unite-outline'
+    Plug 'tsukkee/unite-tag'
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
 "" }
@@ -580,27 +585,46 @@
         let g:syntastic_check_on_wq = 0
     " }
 
-    " ctrlp {
-        " Setup some default ignores
-        let g:ctrlp_custom_ignore = {
-                    \ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
-                    \ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
-                    \}
+    " Unite {
+        let g:unite_source_codesearch_ignore_case = 1
+        let g:unite_enable_start_insert = 0
+        let g:unite_enable_short_source_mes = 0
+        let g:unite_force_overwrite_statusline = 0
+        let g:unite_prompt = '>>> '
+        let g:unite_marked_icon = '✓'
+        let g:unite_candidate_icon = '∘'
+        let g:unite_winheight = 15
+        let g:unite_update_time = 200
+        let g:unite_split_rule = 'botright'
+        let g:unite_source_buffer_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_source_file_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_source_directory_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_data_directory='~/.sivim/cache/unite'
+        let g:unite_source_history_yank_enable=1
+        if executable('ag')
+            let g:unite_source_grep_command = 'ag'
+            let g:unite_source_grep_default_opts='-i -r --line-numbers --nocolor --nogroup -S'
+            let g:unite_source_grep_recursive_opt = ''
+        endif
 
-        " Use the nearest .git directory as the cwd
-        " This makes a lot of sense if you are working on a project that is in version
-        " control. It also supports works with .svn, .hg, .bzr.
-        let g:ctrlp_working_path_mode = 'r'
+        " files
+        nnoremap <silent><Leader>uo :Unite -silent -start-insert file<CR>
+        nnoremap <silent><Leader>uO :Unite -silent -start-insert file_rec/async<CR>
+        nnoremap <silent><Leader>um :Unite -silent file_mru<CR>
+        " buffers
+        nnoremap <silent><Leader>ub :Unite -silent buffer<CR>
+        " tabs
+        nnoremap <silent><Leader>uB :Unite -silent tab<CR>
+        " grep
+        nnoremap <silent><Leader>ua :Unite -silent -no-quit grep<CR>
+        " tasks
+        nnoremap <silent><Leader>u; :Unite -silent -toggle
+                    \ grep:%::FIXME\|TODO\|NOTE\|XXX\|COMBAK\|@todo<CR>
 
-        " Use a leader instead of the actual named binding
-        nmap <leader>p :CtrlP<cr>
+        " menus
+        let g:unite_source_menu_menus = {}
 
-        " Easy bindings for its various modes
-        nmap <leader>bb :CtrlPBuffer<cr>
-        nmap <leader>bm :CtrlPMixed<cr>
-        nmap <leader>bs :CtrlPMRU<cr>
     " }
-
 "}
 
 " Functions {
