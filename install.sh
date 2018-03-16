@@ -108,31 +108,31 @@ install_vim () {
 # install_package_manager {{{
 install_package_manager () {
   # dein package manager
-  #if [[ ! -d "$HOME/.sivim/bundles/dein.vim" ]]; then
-  #  info "Install dein.vim"
-  #  git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/bundles/dein.vim
-  #  success "dein.vim installation done"
-  #fi
-
-  # vim-plug package manager
-  info "Install vim-plug package manager"
-  curl -sfLo ~/.sivim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  success "vim-plug installation done"
-}
-# }}}
-
-# install_default_colorscheme {{{
-install_default_colorscheme () {
-  # gruvbox color scheme
-  if [[ ! -d "$HOME/.sivim/plugged/gruvbox" ]]; then
-    info "Install gruvbox"
-    mkdir -p $HOME/.sivim/plugged
-    git clone https://github.com/morhetz/gruvbox.git $HOME/.sivim/plugged/gruvbox
-    success "gruvbox installation done"
+  if [[ ! -d "$HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim" ]]; then
+    info "Install dein.vim"
+    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim
+    success "dein.vim installation done"
   fi
+
+  ## vim-plug package manager
+  #info "Install vim-plug package manager"
+  #curl -sfLo ~/.sivim/autoload/plug.vim --create-dirs \
+  #  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  #success "vim-plug installation done"
 }
 # }}}
+
+## install_default_colorscheme {{{
+#install_default_colorscheme () {
+#  # gruvbox color scheme
+#  if [[ ! -d "$HOME/.sivim/plugins/gruvbox" ]]; then
+#    info "Install gruvbox"
+#    mkdir -p $HOME/.sivim/plugins
+#    git clone https://github.com/morhetz/gruvbox.git $HOME/.sivim/plugins/gruvbox
+#    success "gruvbox installation done"
+#  fi
+#}
+## }}}
 
 # install_neovim {{{
 install_neovim () {
@@ -258,13 +258,13 @@ usage () {
 
 # install_vim_plugins {{{
 install_vim_plugins () {
-   vim +PlugUpdate +qa
+   vim +qall!
 }
 # }}}
 
 # install_neovim_plugins {{{
 install_neovim_plugins () {
-   nvim +PlugUpdate +qa
+   nvim +qall!
 }
 # }}}
 
@@ -387,7 +387,7 @@ main () {
           case $2 in
             neovim)
               install_neovim
-              install_default_colorscheme
+              #install_default_colorscheme
               install_neovim_plugins
               install_done
               exit 0
@@ -402,7 +402,7 @@ main () {
         fi
         #install_vim
         install_neovim
-        install_default_colorscheme
+        #install_default_colorscheme
         # install_vim_plugins
         install_neovim_plugins
         install_done
@@ -424,7 +424,7 @@ main () {
     install_neovim
     install_package_manager
     install_fonts
-    install_default_colorscheme
+    #install_default_colorscheme
     # install_vim_plugins
     install_neovim_plugins
     install_done

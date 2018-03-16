@@ -9,8 +9,9 @@
     endif
 " }
 
-"" Vim-Plug {
+"" Plugin manager {
     " Plugins will be downloaded under the specified directory.
+<<<<<<< HEAD
     call plug#begin('~/.sivim/plugged')
     " Declare the list of plugins.
     Plug 'godlygeek/tabular'
@@ -28,6 +29,40 @@
     Plug 'easymotion/vim-easymotion'
     " List ends here. Plugins become visible to Vim after this call.
     call plug#end()
+=======
+    set runtimepath+=~/.sivim/plugins/repos/github.com/Shougo/dein.vim
+    if dein#load_state('~/.sivim/plugins')
+        call dein#begin('~/.sivim/plugins')
+        call dein#add('Shougo/dein.vim')
+        " Declare the list of plugins.
+        call dein#add('morhetz/gruvbox')                     " Default colorscheme
+        call dein#add('godlygeek/tabular')                   " Text alignment
+        call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
+        "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
+        call dein#add('scrooloose/nerdcommenter')            " Comment functions
+        call dein#add('tmhedberg/SimpylFold')                " Code folding for python
+        call dein#add('tpope/vim-fugitive')                  " Git wrapper
+        call dein#add('tpope/vim-sensible')                  " Basic configs
+        call dein#add('vim-airline/vim-airline')             " status line
+        call dein#add('vim-airline/vim-airline-themes')      " Themes for airline
+        call dein#add('vim-syntastic/syntastic')             " Syntax checker
+        call dein#add('easymotion/vim-easymotion')           " Move easier through the code
+        " Unite dependencies:
+        call dein#add('Shougo/vimproc.vim', {'build': 'make'})
+        call dein#add('Shougo/unite.vim')
+        call dein#add('Shougo/neomru.vim')
+        call dein#add('Shougo/unite-outline')
+        call dein#add('tsukkee/unite-tag')
+        " List ends here. Plugins become visible to Vim after this call.
+        call dein#end()
+        call dein#save_state()
+    endif
+
+    " Install missing plugins
+    if dein#check_install()
+        call dein#install()
+    endif
+>>>>>>> e21da1397d9a91a611536ae8d47f819f885ecba1
 "" }
 
 " General {
@@ -225,6 +260,9 @@
     else
         let maplocalleader=g:sivim_localleader
     endif
+
+    " Update plugins on startup
+    noremap <leader>du :call dein#update()<CR>
 
     " Change background color
     noremap <leader>bg :call ToggleBG()<CR>
@@ -437,9 +475,9 @@
     nmap <F1> <nop>
 " }
 
-" Plugins {
+" Plugin configuration {
     " Tabularize {
-        if isdirectory(expand("~/.sivim/plugged/tabular"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/godlygeek/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
@@ -465,7 +503,7 @@
             let g:pymode = 0
         endif
 
-        if isdirectory(expand("~/.sivim/plugged/python-mode"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/python-mode"))
             let g:pymode_lint_checkers = ['pyflakes']
             let g:pymode_trim_whitespaces = 0
             let g:pymode_options = 0
@@ -474,7 +512,7 @@
     " }
 
     " Fugitive {
-        if isdirectory(expand("~/.sivim/plugged/vim-fugitive"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-fugitive"))
             nnoremap <silent> <leader>gs :Gstatus<CR>
             nnoremap <silent> <leader>gd :Gdiff<CR>
             nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -490,16 +528,8 @@
         endif
     "}
 
-    " UndoTree {
-        if isdirectory(expand("~/.sivim/plugged/undotree"))
-            nnoremap <Leader>u :UndotreeToggle<CR>
-            " If undotree is opened, it is likely one wants to interact with it.
-            let g:undotree_SetFocusWhenToggle=1
-        endif
-    " }
-
     " indent_guides {
-        if isdirectory(expand("~/.sivim/plugged/vim-indent-guides/"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/nathanaelkane/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
             let g:indent_guides_enable_on_vim_startup = 1
@@ -515,13 +545,40 @@
 
         " See `:echo g:airline_theme_map` for some more choices
         " Default in terminal vim is 'dark'
-        if isdirectory(expand("~/.sivim/plugged/vim-airline-themes/"))
+        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-airline/vim-airline-themes/"))
+            let g:airline_powerline_fonts = 1
             if !exists('g:airline_theme')
                 let g:airline_theme = 'dark'
             endif
-            " Use the default set of separators with a few customizations
-            let g:airline_left_sep='›'  " Slightly fancier than '>'
-            let g:airline_right_sep='‹' " Slightly fancier than '<'
+            if !exists('g:airline_symbols')
+                let g:airline_symbols = {}
+            endif
+
+            " unicode symbols
+            let g:airline_left_sep = '»'
+            let g:airline_left_sep = '▶'
+            let g:airline_right_sep = '«'
+            let g:airline_right_sep = '◀'
+            let g:airline_symbols.linenr = '␊'
+            let g:airline_symbols.linenr = '␤'
+            let g:airline_symbols.linenr = '¶'
+            let g:airline_symbols.branch = '⎇'
+            let g:airline_symbols.paste = 'ρ'
+            let g:airline_symbols.paste = 'Þ'
+            let g:airline_symbols.paste = '∥'
+            let g:airline_symbols.whitespace = 'Ξ'
+
+            " airline symbols
+            let g:airline_left_sep = ''
+            let g:airline_left_alt_sep = ''
+            let g:airline_right_sep = ''
+            let g:airline_right_alt_sep = ''
+            let g:airline_symbols.branch = ''
+            let g:airline_symbols.readonly = ''
+            let g:airline_symbols.linenr = ''
+            "" Use the default set of separators with a few customizations
+            "let g:airline_left_sep='›'  " Slightly fancier than '>'
+            "let g:airline_right_sep='‹' " Slightly fancier than '<'
         endif
     " }
 
@@ -536,30 +593,92 @@
         let g:syntastic_check_on_wq = 0
     " }
 
-    " ctrlp {
-        " Setup some default ignores
-        let g:ctrlp_custom_ignore = {
-                    \ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
-                    \ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
-                    \}
+    " Unite {
+        let g:unite_source_codesearch_ignore_case = 1
+        let g:unite_enable_start_insert = 0
+        let g:unite_enable_short_source_mes = 0
+        let g:unite_force_overwrite_statusline = 0
+        let g:unite_prompt = '>>> '
+        let g:unite_marked_icon = '✓'
+        let g:unite_candidate_icon = '∘'
+        let g:unite_winheight = 15
+        let g:unite_update_time = 200
+        let g:unite_split_rule = 'botright'
+        let g:unite_source_buffer_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_source_file_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_source_directory_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
+        let g:unite_data_directory='~/.sivim/cache/unite'
+        let g:unite_source_history_yank_enable=1
+        if executable('ag')
+            let g:unite_source_grep_command = 'ag'
+            let g:unite_source_grep_default_opts='-i -r --line-numbers --nocolor --nogroup -S'
+            let g:unite_source_grep_recursive_opt = ''
+        endif
 
-        " Use the nearest .git directory as the cwd
-        " This makes a lot of sense if you are working on a project that is in version
-        " control. It also supports works with .svn, .hg, .bzr.
-        let g:ctrlp_working_path_mode = 'r'
+        " files
+        nnoremap <silent><Leader>uo :Unite -silent -start-insert file<CR>
+        nnoremap <silent><Leader>uO :Unite -silent -start-insert file_rec/async<CR>
+        nnoremap <silent><Leader>um :Unite -silent file_mru<CR>
+        " buffers
+        nnoremap <silent><Leader>ub :Unite -silent buffer<CR>
+        " tabs
+        nnoremap <silent><Leader>uB :Unite -silent tab<CR>
+        " grep
+        nnoremap <silent><Leader>ua :Unite -silent -no-quit grep<CR>
+        " tasks
+        nnoremap <silent><Leader>u; :Unite -silent -toggle
+                    \ grep:%::FIXME\|TODO\|NOTE\|XXX\|COMBAK\|@todo<CR>
 
-        " Use a leader instead of the actual named binding
-        nmap <leader>p :CtrlP<cr>
+        " menus
+        let g:unite_source_menu_menus = {}
 
-        " Easy bindings for its various modes
-        nmap <leader>bb :CtrlPBuffer<cr>
-        nmap <leader>bm :CtrlPMixed<cr>
-        nmap <leader>bs :CtrlPMRU<cr>
     " }
-
 "}
 
 " Functions {
+
+    " Initialize directories {
+    function! InitializeDirectories()
+        let parent = $HOME . '/.sivim'
+        let prefix = 'vim'
+        let dir_list = {
+                    \ 'backup': 'backupdir',
+                    \ 'views': 'viewdir',
+                    \ 'swap': 'directory' }
+
+        if has('persistent_undo')
+            let dir_list['undo'] = 'undodir'
+        endif
+
+        " To specify a different directory in which to place the vimbackup,
+        " vimviews, vimundo, and vimswap files/directories, add the following to
+        " your .sivim/config/init.before.vim file:
+        "   let g:sivim_consolidated_directory = <full path to desired directory>
+        "   eg: let g:sivim_consolidated_directory = $HOME . '/.sivim/'
+        if exists('g:sivim_consolidated_directory')
+            let common_dir = g:sivim_consolidated_directory . prefix
+        else
+            let common_dir = parent . '/' . prefix
+        endif
+
+        for [dirname, settingname] in items(dir_list)
+            let directory = common_dir . dirname . '/'
+            if exists("*mkdir")
+                if !isdirectory(directory)
+                    call mkdir(directory)
+                endif
+            endif
+            if !isdirectory(directory)
+                echo "Warning: Unable to create backup directory: " . directory
+                echo "Try: mkdir -p " . directory
+            else
+                let directory = substitute(directory, " ", "\\\\ ", "g")
+                exec "set " . settingname . "=" . directory
+            endif
+        endfor
+    endfunction
+    call InitializeDirectories()
+    " }
 
     " Strip whitespace {
     function! StripTrailingWhitespace()
@@ -598,6 +717,7 @@
     " e.g. Grep current file for <search_term>: Shell grep -Hn <search_term> %
     " }
 
+    " Edit and source config files {
     function! s:ExpandFilenameAndExecute(command, file)
         execute a:command . " " . expand(a:file, ":p")
     endfunction
@@ -616,6 +736,7 @@
 
     execute "noremap " . s:sivim_edit_config_mapping "    :call <SID>EditSiVimConfig()<CR>"
     execute "noremap " . s:sivim_apply_config_mapping . " :source $MYVIMRC<CR>"
+    " }
 " }
 
 " Use after config if available {
