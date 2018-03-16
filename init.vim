@@ -11,25 +11,6 @@
 
 "" Plugin manager {
     " Plugins will be downloaded under the specified directory.
-<<<<<<< HEAD
-    call plug#begin('~/.sivim/plugged')
-    " Declare the list of plugins.
-    Plug 'godlygeek/tabular'
-    Plug 'morhetz/gruvbox'
-    Plug 'nathanaelkane/vim-indent-guides'
-    "Plug 'python-mode/python-mode'
-    Plug 'scrooloose/nerdcommenter'
-    Plug 'tmhedberg/SimpylFold'
-    Plug 'tpope/vim-fugitive'
-    Plug 'tpope/vim-sensible'
-    Plug 'vim-airline/vim-airline'
-    Plug 'vim-airline/vim-airline-themes'
-    Plug 'vim-syntastic/syntastic'
-    Plug 'kien/ctrlp.vim'
-    Plug 'easymotion/vim-easymotion'
-    " List ends here. Plugins become visible to Vim after this call.
-    call plug#end()
-=======
     set runtimepath+=~/.sivim/plugins/repos/github.com/Shougo/dein.vim
     if dein#load_state('~/.sivim/plugins')
         call dein#begin('~/.sivim/plugins')
@@ -62,7 +43,6 @@
     if dein#check_install()
         call dein#install()
     endif
->>>>>>> e21da1397d9a91a611536ae8d47f819f885ecba1
 "" }
 
 " General {
