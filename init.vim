@@ -200,10 +200,10 @@
 " Formatting {
 
     set nowrap                      " Do not wrap long lines
-    set shiftwidth=4                " Use indents of 4 spaces
     set expandtab                   " Tabs are spaces, not tabs
-    set tabstop=4                   " An indentation every four columns
+    "set tabstop=8                   " An indentation every four columns
     set softtabstop=4               " Let backspace delete indent
+    set shiftwidth=4                " Use indents of 4 spaces
     set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
     set splitright                  " Puts new vsplit windows to the right of the current
     set splitbelow                  " Puts new split windows to the bottom of the current
@@ -214,7 +214,7 @@
     " To disable the stripping of whitespace, add the following to your
     " ~/.sivim/config/init.before.vim file:
     "   let g:sivim_keep_trailing_whitespace = 1
-    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql,verilog,systemverilog autocmd BufWritePre <buffer> if !exists('g:sivim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
+    autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql,verilog,systemverilog,verilog_systemverilog autocmd BufWritePre <buffer> if !exists('g:sivim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
     "autocmd FileType go autocmd BufWritePre <buffer> Fmt
     autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
     autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
@@ -253,7 +253,7 @@
     noremap <leader>du :call dein#update()<CR>
 
     " Change background color
-    noremap <leader>bg :call ToggleBG()<CR>
+    "noremap <leader>bg :call ToggleBG()<CR>
     "noremap <leader>bc :call SwitchCTRST()<CR>
 
     " The default mappings for editing and applying the sivim configuration
