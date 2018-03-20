@@ -17,6 +17,9 @@
         call dein#add('Shougo/dein.vim')
         " Declare the list of plugins.
         call dein#add('morhetz/gruvbox')                     " Default colorscheme
+        call dein#add('junegunn/seoul256.vim')               " Default colorscheme
+        call dein#add('altercation/vim-colors-solarized')                     " Default colorscheme
+        call dein#add('jnurmine/Zenburn')                     " Default colorscheme
         call dein#add('godlygeek/tabular')                   " Text alignment
         call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
         "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
@@ -34,6 +37,8 @@
         call dein#add('Shougo/neomru.vim')
         call dein#add('Shougo/unite-outline')
         call dein#add('tsukkee/unite-tag')
+        " Verilog plugins
+        call dein#add('vhda/verilog_systemverilog.vim')
         " List ends here. Plugins become visible to Vim after this call.
         call dein#end()
         call dein#save_state()
@@ -57,29 +62,29 @@
         endif
     endfunction
 
-    function! SwitchCTRST()
-        let s:tbg = &background
-        if s:tbg == "dark"
-            let s:sctrst = g:gruvbox_contrast_dark
-        else
-            let s:sctrst = g:gruvbox_contrast_light
-        endif
+    "function! SwitchCTRST()
+    "    let s:tbg = &background
+    "    if s:tbg == "dark"
+    "        let s:sctrst = g:gruvbox_contrast_dark
+    "    else
+    "        let s:sctrst = g:gruvbox_contrast_light
+    "    endif
 
-        if s:sctrst == "medium"
-            let s:sctrst = 'soft'
-        elseif s:sctrst == "soft"
-            let s:sctrst = 'hard'
-        else
-            let s:sctrst = 'medium'
-        endif
+    "    if s:sctrst == "medium"
+    "        let s:sctrst = 'soft'
+    "    elseif s:sctrst == "soft"
+    "        let s:sctrst = 'hard'
+    "    else
+    "        let s:sctrst = 'medium'
+    "    endif
 
-        if s:tbg == "dark"
-            let g:gruvbox_contrast_dark = s:sctrst
-        else
-            let g:gruvbox_contrast_light = s:sctrst
-        endif
-        colorscheme gruvbox
-    endfunction
+    "    if s:tbg == "dark"
+    "        let g:gruvbox_contrast_dark = s:sctrst
+    "    else
+    "        let g:gruvbox_contrast_light = s:sctrst
+    "    endif
+    "    colorscheme gruvbox
+    "endfunction
 
     set mouse=a                 " Automatically enable mouse usage
     set mousehide               " Hide the mouse cursor while typing
@@ -159,9 +164,12 @@
 " Vim UI {
 
     " Set colorscheme {
+        "set background=dark
+        "let g:gruvbox_contrast_dark = 'medium'
+        "colorscheme gruvbox
+        let g:solarized_termcolors=256
+        colorscheme solarized
         set background=dark
-        let g:gruvbox_contrast_dark = 'medium'
-        colorscheme gruvbox
     " }
 
     set showmode                    " Display the current mode
@@ -246,7 +254,7 @@
 
     " Change background color
     noremap <leader>bg :call ToggleBG()<CR>
-    noremap <leader>bc :call SwitchCTRST()<CR>
+    "noremap <leader>bc :call SwitchCTRST()<CR>
 
     " The default mappings for editing and applying the sivim configuration
     " are <leader>ev and <leader>sv respectively. Change them to your preference
@@ -595,18 +603,24 @@
             let g:unite_source_grep_recursive_opt = ''
         endif
 
-        " files
-        nnoremap <silent><Leader>uo :Unite -silent -start-insert file<CR>
-        nnoremap <silent><Leader>uO :Unite -silent -start-insert file_rec/async<CR>
-        nnoremap <silent><Leader>um :Unite -silent file_mru<CR>
-        " buffers
-        nnoremap <silent><Leader>ub :Unite -silent buffer<CR>
-        " tabs
-        nnoremap <silent><Leader>uB :Unite -silent tab<CR>
-        " grep
-        nnoremap <silent><Leader>ua :Unite -silent -no-quit grep<CR>
-        " tasks
-        nnoremap <silent><Leader>u; :Unite -silent -toggle
+        " Files
+        nnoremap <silent><Leader>bo :Unite -silent file<CR>
+        nnoremap <silent><Leader>bO :Unite -silent -start-insert file<CR>
+        " Files recursive
+        nnoremap <silent><Leader>br :Unite -silent file_rec/async<CR>
+        nnoremap <silent><Leader>bR :Unite -silent -start-insert file_rec/async<CR>
+        " Most recent
+        nnoremap <silent><Leader>bm :Unite -silent file_mru<CR>
+        " Buffers
+        nnoremap <silent><Leader>bb :Unite -silent buffer<CR>
+        nnoremap <silent><Leader>bB :Unite -silent -start-insert buffer<CR>
+        " Tabs
+        nnoremap <silent><Leader>bt :Unite -silent tab<CR>
+        nnoremap <silent><Leader>bt :Unite -silent -start-insert tab<CR>
+        " Grep
+        nnoremap <silent><Leader>ba :Unite -silent -no-quit grep<CR>
+        " Tasks
+        nnoremap <silent><Leader>bu; :Unite -silent -toggle
                     \ grep:%::FIXME\|TODO\|NOTE\|XXX\|COMBAK\|@todo<CR>
 
         " menus
