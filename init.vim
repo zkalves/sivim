@@ -17,9 +17,6 @@
         call dein#add('Shougo/dein.vim')
         " Declare the list of plugins.
         call dein#add('morhetz/gruvbox')                     " Default colorscheme
-        call dein#add('junegunn/seoul256.vim')               " Default colorscheme
-        call dein#add('altercation/vim-colors-solarized')                     " Default colorscheme
-        call dein#add('jnurmine/Zenburn')                     " Default colorscheme
         call dein#add('godlygeek/tabular')                   " Text alignment
         call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
         "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
@@ -60,31 +57,32 @@
         else
             set background=dark
         endif
+        colorscheme gruvbox
     endfunction
 
-    "function! SwitchCTRST()
-    "    let s:tbg = &background
-    "    if s:tbg == "dark"
-    "        let s:sctrst = g:gruvbox_contrast_dark
-    "    else
-    "        let s:sctrst = g:gruvbox_contrast_light
-    "    endif
+    function! SwitchCTRST()
+        let s:tbg = &background
+        if s:tbg == "dark"
+            let s:sctrst = g:gruvbox_contrast_dark
+        else
+            let s:sctrst = g:gruvbox_contrast_light
+        endif
 
-    "    if s:sctrst == "medium"
-    "        let s:sctrst = 'soft'
-    "    elseif s:sctrst == "soft"
-    "        let s:sctrst = 'hard'
-    "    else
-    "        let s:sctrst = 'medium'
-    "    endif
+        if s:sctrst == "medium"
+            let s:sctrst = 'soft'
+        elseif s:sctrst == "soft"
+            let s:sctrst = 'hard'
+        else
+            let s:sctrst = 'medium'
+        endif
 
-    "    if s:tbg == "dark"
-    "        let g:gruvbox_contrast_dark = s:sctrst
-    "    else
-    "        let g:gruvbox_contrast_light = s:sctrst
-    "    endif
-    "    colorscheme gruvbox
-    "endfunction
+        if s:tbg == "dark"
+            let g:gruvbox_contrast_dark = s:sctrst
+        else
+            let g:gruvbox_contrast_light = s:sctrst
+        endif
+        colorscheme gruvbox
+    endfunction
 
     set mouse=a                 " Automatically enable mouse usage
     set mousehide               " Hide the mouse cursor while typing
@@ -164,12 +162,8 @@
 " Vim UI {
 
     " Set colorscheme {
-        "set background=dark
-        "let g:gruvbox_contrast_dark = 'medium'
-        "colorscheme gruvbox
-        let g:solarized_termcolors=256
-        colorscheme solarized
         set background=dark
+        colorscheme gruvbox
     " }
 
     set showmode                    " Display the current mode
@@ -253,8 +247,8 @@
     noremap <leader>du :call dein#update()<CR>
 
     " Change background color
-    "noremap <leader>bg :call ToggleBG()<CR>
-    "noremap <leader>bc :call SwitchCTRST()<CR>
+    noremap <leader>bg :call ToggleBG()<CR>
+    noremap <leader>bc :call SwitchCTRST()<CR>
 
     " The default mappings for editing and applying the sivim configuration
     " are <leader>ev and <leader>sv respectively. Change them to your preference
@@ -625,7 +619,62 @@
 
         " menus
         let g:unite_source_menu_menus = {}
+        
+        " Unite window mappings
+        autocmd FileType unite call s:unite_my_settings()
+        function! s:unite_my_settings()
+            " Overwrite settings.
 
+            " Play nice with supertab
+            let b:SuperTabDisabled=1
+            " Enable navigation with control-j and control-k in insert mode
+            imap <buffer> <C-n>   <Plug>(unite_select_next_line)
+            nmap <buffer> <C-n>   <Plug>(unite_select_next_line)
+            imap <buffer> <C-p>   <Plug>(unite_select_previous_line)
+            nmap <buffer> <C-p>   <Plug>(unite_select_previous_line)
+
+
+            imap <buffer> jj      <Plug>(unite_insert_leave)
+            "imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
+
+            imap <buffer><expr> j unite#smart_map('j', '')
+            imap <buffer> <TAB>   <Plug>(unite_select_next_line)
+            imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
+            imap <buffer> '     <Plug>(unite_quick_match_default_action)
+            nmap <buffer> '     <Plug>(unite_quick_match_default_action)
+            imap <buffer><expr> x
+                        \ unite#smart_map('x', "\<Plug>(unite_quick_match_choose_action)")
+            nmap <buffer> x     <Plug>(unite_quick_match_choose_action)
+            nmap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+            imap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+            imap <buffer> <C-y>     <Plug>(unite_narrowing_path)
+            nmap <buffer> <C-y>     <Plug>(unite_narrowing_path)
+            nmap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
+            imap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
+            nmap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+            imap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+            nnoremap <silent><buffer><expr> l
+                        \ unite#smart_map('l', unite#do_action('default'))
+
+            let unite = unite#get_current_unite()
+            if unite.profile_name ==# 'search'
+                nnoremap <silent><buffer><expr> r     unite#do_action('replace')
+            else
+                nnoremap <silent><buffer><expr> r     unite#do_action('rename')
+            endif
+
+            nnoremap <silent><buffer><expr> cd     unite#do_action('lcd')
+            nnoremap <buffer><expr> S      unite#mappings#set_current_filters(
+                        \ empty(unite#mappings#get_current_filters()) ?
+                        \ ['sorter_reverse'] : [])
+
+            " Runs "split" action by <C-s>.
+            imap <silent><buffer><expr> <C-s>     unite#do_action('split')
+            nmap <silent><buffer><expr> <C-s>     unite#do_action('split')
+            " Runs "vsplit" action by <C-v>.
+            imap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
+            nmap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
+        endfunction
     " }
 "}
 
