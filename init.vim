@@ -1,8 +1,3 @@
-" Modeline  {
-" vim: set sw=4 ts=4 sts=4 et tw=78 foldmarker={,} foldlevel=0 foldmethod=marker spell:
-"
-" }
-
 " Use before config if available {
     if filereadable(expand("~/.sivim/config/init.before.vim"))
         source ~/.sivim/config/init.before.vim
@@ -17,6 +12,7 @@
         call dein#add('Shougo/dein.vim')
         " Declare the list of plugins.
         call dein#add('morhetz/gruvbox')                     " Default colorscheme
+        call dein#add('icymind/NeoSolarized')
         call dein#add('godlygeek/tabular')                   " Text alignment
         call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
         "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
@@ -50,6 +46,7 @@
 " General {
     " Allow to trigger background
     function! ToggleBG()
+        let s:color_name = g:colors_name
         let s:tbg = &background
         " Inversion
         if s:tbg == "dark"
@@ -57,10 +54,11 @@
         else
             set background=dark
         endif
-        colorscheme gruvbox
+        exe "colorscheme " . s:color_name
     endfunction
 
     function! SwitchCTRST()
+        let s:color_name = g:colors_name
         let s:tbg = &background
         if s:tbg == "dark"
             let s:sctrst = g:gruvbox_contrast_dark
@@ -81,7 +79,7 @@
         else
             let g:gruvbox_contrast_light = s:sctrst
         endif
-        colorscheme gruvbox
+        exe "colorscheme " . s:color_name
     endfunction
 
     set mouse=a                 " Automatically enable mouse usage
@@ -159,38 +157,6 @@
 
 " }
 
-" Vim UI {
-
-    " Set colorscheme {
-        set background=dark
-        colorscheme gruvbox
-    " }
-
-    set showmode                    " Display the current mode
-
-    set cursorline                  " Highlight current line
-
-    highlight clear SignColumn      " SignColumn should match background
-    highlight clear LineNr          " Current line number row will have same background color in relative mode
-    "highlight clear CursorLineNr    " Remove highlight color from current line number
-
-    set linespace=0                 " No extra spaces between rows
-    set number                      " Line numbers on
-    set showmatch                   " Show matching brackets/parenthesis
-    set hlsearch                    " Highlight search terms
-    set winminheight=0              " Windows can be 0 line high
-    set ignorecase                  " Case insensitive search
-    set smartcase                   " Case sensitive when uc present
-    set wildmenu                    " Show list instead of just completing
-    set wildmode=list:longest,full  " Command <Tab> completion, list matches, then longest common part, then all.
-    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
-    set scrolljump=5                " Lines to scroll when cursor leaves screen
-    set foldenable                  " Auto fold code
-    set foldmethod=indent           " Enable folding
-    set foldlevel=99
-    set list
-" }
-
 " Formatting {
 
     set nowrap                      " Do not wrap long lines
@@ -224,6 +190,7 @@
     " Flag unnecessary whitespace
     highlight BadWhitespace ctermbg=red guibg=darkred
     autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
 " }
 
 " Key (re)Mappings {
@@ -678,6 +645,38 @@
     " }
 "}
 
+" Vim UI {
+
+    " Set colorscheme {
+        set background=dark
+        colorscheme NeoSolarized
+    " }
+
+    set showmode                    " Display the current mode
+
+    set cursorline                  " Highlight current line
+
+    highlight clear SignColumn      " SignColumn should match background
+    highlight clear LineNr          " Current line number row will have same background color in relative mode
+    "highlight clear CursorLineNr    " Remove highlight color from current line number
+
+    set linespace=0                 " No extra spaces between rows
+    set number                      " Line numbers on
+    set showmatch                   " Show matching brackets/parenthesis
+    set hlsearch                    " Highlight search terms
+    set winminheight=0              " Windows can be 0 line high
+    set ignorecase                  " Case insensitive search
+    set smartcase                   " Case sensitive when uc present
+    set wildmenu                    " Show list instead of just completing
+    set wildmode=list:longest,full  " Command <Tab> completion, list matches, then longest common part, then all.
+    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
+    set scrolljump=5                " Lines to scroll when cursor leaves screen
+    set foldenable                  " Auto fold code
+    set foldmethod=syntax           " Enable folding
+    set foldlevel=99
+    set list
+" }
+
 " Functions {
 
     " Initialize directories {
@@ -786,4 +785,9 @@
     if filereadable(expand("~/.sivim/config/init.after.vim"))
         source ~/.sivim/config/init.after.vim
     endif
+" }
+
+" Modeline  {
+" vim: set sw=4 ts=8 sts=4 et tw=78 fen foldmarker={,} foldlevel=0 foldmethod=marker spell:
+"
 " }
