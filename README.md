@@ -68,3 +68,6 @@ NOTES:
         ./configure prefix=$HOME/usr/local
         edit config.h file as you like
         make && make install
+        
+        
+        https://blog.bugsnag.com/tmux-and-vim/
