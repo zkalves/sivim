@@ -50,4 +50,20 @@ NOTES:
     - konsole:
         https://github.com/phiggins/konsole-colors-solarized
 
-
+    - To install Tmux:
+      1. Download libevent from: http://libevent.org/
+      2. Compile it and install it, for non-root:
+        ./configure prefix=$HOME/usr/local
+        make && make install
+      3. Download tmux repository:
+        git clone https://github.com/tmux/tmux.git
+        cd tmux
+        sh autogen.sh
+        ./configure prefix=$HOME/usr/local CFLAGS="-I$HOME/usr/local/include" LDFLAGS="-L$HOME/usr/local/lib"
+        make && make install
+      4. Install st terminal
+        git clone https://git.suckless.org/
+        cd st
+        ./configure prefix=$HOME/usr/local
+        edit config.h file as you like
+        make && make install
