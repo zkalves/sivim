@@ -59,9 +59,10 @@ NOTES:
         git clone https://github.com/tmux/tmux.git
         cd tmux
         sh autogen.sh
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/usr/local/lib
         ./configure prefix=$HOME/usr/local CFLAGS="-I$HOME/usr/local/include" LDFLAGS="-L$HOME/usr/local/lib"
         make && make install
-      4. Install st terminal
+    - Install st terminal:
         git clone https://git.suckless.org/
         cd st
         ./configure prefix=$HOME/usr/local
