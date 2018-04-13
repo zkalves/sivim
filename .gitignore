@@ -1,3 +1,9 @@
 **/*~
 config/init.before.vim
 config/init.after.vim
+.netrwhist
+cache/
+plugins/
+vimswap/
+vimundo/
+
