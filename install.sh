@@ -108,9 +108,9 @@ install_vim () {
 # install_package_manager {{{
 install_package_manager () {
   # dein package manager
-  if [[ ! -d "$HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim" ]]; then
+  if [[ ! -d "$HOME/.sivim/dein/repos/github.com/Shougo/dein.vim" ]]; then
     info "Install dein.vim"
-    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/plugins/repos/github.com/Shougo/dein.vim
+    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/dein/repos/github.com/Shougo/dein.vim
     success "dein.vim installation done"
   fi
 

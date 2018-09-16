@@ -1,8 +1,3 @@
-" Modeline  {
-" vim: set sw=4 ts=4 sts=4 et tw=78 foldmarker={,} foldlevel=0 foldmethod=marker spell:
-"
-" }
-
 " Use before config if available {
     if filereadable(expand("~/.sivim/config/init.before.vim"))
         source ~/.sivim/config/init.before.vim
@@ -11,15 +6,16 @@
 
 "" Plugin manager {
     " Plugins will be downloaded under the specified directory.
-    set runtimepath+=~/.sivim/plugins/repos/github.com/Shougo/dein.vim
-    if dein#load_state('~/.sivim/plugins')
-        call dein#begin('~/.sivim/plugins')
+    set runtimepath+=~/.sivim/dein/repos/github.com/Shougo/dein.vim
+    let g:dein#install_process_timeout = 3600 * 2
+    if dein#load_state('~/.sivim/dein')
+        call dein#begin('~/.sivim/dein')
         call dein#add('Shougo/dein.vim')
         " Declare the list of plugins.
-        call dein#add('morhetz/gruvbox')                     " Default colorscheme
+        call dein#add('altercation/vim-colors-solarized', {'merged': 0})    " Default colorscheme
         call dein#add('godlygeek/tabular')                   " Text alignment
         call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
-        "call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
+        call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
         call dein#add('scrooloose/nerdcommenter')            " Comment functions
         call dein#add('tmhedberg/SimpylFold')                " Code folding for python
         call dein#add('tpope/vim-fugitive')                  " Git wrapper
@@ -28,12 +24,18 @@
         call dein#add('vim-airline/vim-airline-themes')      " Themes for airline
         call dein#add('vim-syntastic/syntastic')             " Syntax checker
         call dein#add('easymotion/vim-easymotion')           " Move easier through the code
+        call dein#add('christoomey/vim-tmux-navigator')
+        call dein#add('tmux-plugins/vim-tmux-focus-events')
         " Unite dependencies:
         call dein#add('Shougo/vimproc.vim', {'build': 'make'})
         call dein#add('Shougo/unite.vim')
         call dein#add('Shougo/neomru.vim')
+        call dein#add('Shougo/neoyank.vim')
         call dein#add('Shougo/unite-outline')
         call dein#add('tsukkee/unite-tag')
+        " Verilog plugins
+        call dein#add('vhda/verilog_systemverilog.vim')
+        call dein#add('bfredl/nvim-miniyank')
         " List ends here. Plugins become visible to Vim after this call.
         call dein#end()
         call dein#save_state()
@@ -48,6 +50,7 @@
 " General {
     " Allow to trigger background
     function! ToggleBG()
+        let s:color_name = g:colors_name
         let s:tbg = &background
         " Inversion
         if s:tbg == "dark"
@@ -58,6 +61,7 @@
     endfunction
 
     function! SwitchCTRST()
+        let s:color_name = g:colors_name
         let s:tbg = &background
         if s:tbg == "dark"
             let s:sctrst = g:gruvbox_contrast_dark
@@ -78,7 +82,7 @@
         else
             let g:gruvbox_contrast_light = s:sctrst
         endif
-        colorscheme gruvbox
+        exe "colorscheme " . s:color_name
     endfunction
 
     set mouse=a                 " Automatically enable mouse usage
@@ -135,6 +139,9 @@
         augroup END
     endif
 
+    " Ignore whitespaces for diff
+    set diffopt+=iwhite
+
     " Setting up the directories {
         set backup                  " Backups are nice ...
         if has('persistent_undo')
@@ -156,46 +163,13 @@
 
 " }
 
-" Vim UI {
-
-    " Set colorscheme {
-        set background=dark
-        let g:gruvbox_contrast_dark = 'medium'
-        colorscheme gruvbox
-    " }
-
-    set showmode                    " Display the current mode
-
-    set cursorline                  " Highlight current line
-
-    highlight clear SignColumn      " SignColumn should match background
-    highlight clear LineNr          " Current line number row will have same background color in relative mode
-    "highlight clear CursorLineNr    " Remove highlight color from current line number
-
-    set linespace=0                 " No extra spaces between rows
-    set number                      " Line numbers on
-    set showmatch                   " Show matching brackets/parenthesis
-    set hlsearch                    " Highlight search terms
-    set winminheight=0              " Windows can be 0 line high
-    set ignorecase                  " Case insensitive search
-    set smartcase                   " Case sensitive when uc present
-    set wildmenu                    " Show list instead of just completing
-    set wildmode=list:longest,full  " Command <Tab> completion, list matches, then longest common part, then all.
-    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
-    set scrolljump=5                " Lines to scroll when cursor leaves screen
-    set foldenable                  " Auto fold code
-    set foldmethod=indent           " Enable folding
-    set foldlevel=99
-    set list
-" }
-
 " Formatting {
 
     set nowrap                      " Do not wrap long lines
-    set shiftwidth=4                " Use indents of 4 spaces
     set expandtab                   " Tabs are spaces, not tabs
     set tabstop=4                   " An indentation every four columns
     set softtabstop=4               " Let backspace delete indent
+    set shiftwidth=4                " Use indents of 4 spaces
     set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
     set splitright                  " Puts new vsplit windows to the right of the current
     set splitbelow                  " Puts new split windows to the bottom of the current
@@ -270,10 +244,35 @@
     " ~/.sivim/config/init.before.vim file:
     "   let g:sivim_no_easyWindows = 1
     if !exists('g:sivim_no_easyWindows')
-        nnoremap <C-J> <C-W><C-J>
-        nnoremap <C-K> <C-W><C-K>
-        nnoremap <C-L> <C-W><C-L>
-        nnoremap <C-H> <C-W><C-H>
+        " Tmux
+        if exists ('$TMUX')
+            function! TmuxOrSplitSwitch(wincmd, tmuxdir)
+                let previous_winnr = winnr()
+                silent! execute "wincmd " . a:wincmd
+                if previous_winnr == winnr()
+                    call system("tmux select-pane -" . a:tmuxdir)
+                    redraw!
+                endif
+            endfunction
+
+            let previous_title = substitute(system("tmux display-message -p '#{pane_title}'"), '\n', '', '')
+            let &t_ti = "\<Esc>]2;vim\<Esc>\\" . &t_ti
+            let &t_te = "\<Esc>]2;". previous_title . "\<Esc>\\" . &t_te
+
+            nnoremap <silent> <C-h> :call TmuxOrSplitSwitch('h', 'L')<cr>
+            nnoremap <silent> <C-j> :call TmuxOrSplitSwitch('j', 'D')<cr>
+            nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
+            nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
+        else
+            map <C-h> <C-W><C-h>
+            map <C-j> <C-W><C-j>
+            map <C-k> <C-W><C-k>
+            map <C-l> <C-W><C-l>
+            "nnoremap <C-J> <C-W><C-J>
+            "nnoremap <C-K> <C-W><C-K>
+            "nnoremap <C-L> <C-W><C-L>
+            "nnoremap <C-H> <C-W><C-H>
+        endif
     endif
 
     " Wrapped lines goes down/up to next row, rather than next line in file.
@@ -426,6 +425,10 @@
     nmap <leader>tm :tabmove
     nmap <leader>tv :tabe $MYVIMRC<cr>
 
+    " Swap from horizontal to vertical split and viceversa
+    nmap <leader>th <C-w>t<C-w>H
+    nmap <leader>tk <C-w>t<C-w>K
+
     " SOS mappings
     nmap <Leader>sco :!soscmd co %<cr>
     nmap <Leader>scn :!soscmd co -Nlock %<cr>
@@ -453,6 +456,10 @@
 
     " Disable F1 help
     nmap <F1> <nop>
+
+    " Miniyank
+    map p <Plug>(miniyank-autoput)
+    map P <Plug>(miniyank-autoPut)
 " }
 
 " Plugin configuration {
@@ -595,25 +602,127 @@
             let g:unite_source_grep_recursive_opt = ''
         endif
 
-        " files
-        nnoremap <silent><Leader>uo :Unite -silent -start-insert file<CR>
-        nnoremap <silent><Leader>uO :Unite -silent -start-insert file_rec/async<CR>
-        nnoremap <silent><Leader>um :Unite -silent file_mru<CR>
-        " buffers
-        nnoremap <silent><Leader>ub :Unite -silent buffer<CR>
-        " tabs
-        nnoremap <silent><Leader>uB :Unite -silent tab<CR>
-        " grep
-        nnoremap <silent><Leader>ua :Unite -silent -no-quit grep<CR>
-        " tasks
+        " Files
+        nnoremap <silent><Leader>bo :Unite -silent file<CR>
+        nnoremap <silent><Leader>bO :Unite -silent -start-insert file<CR>
+        " Files recursive
+        nnoremap <silent><Leader>br :Unite -silent file_rec/async<CR>
+        nnoremap <silent><Leader>bR :Unite -silent -start-insert file_rec/async<CR>
+        " Most recent
+        nnoremap <silent><Leader>bm :Unite -silent file_mru<CR>
+        " Buffers
+        nnoremap <silent><Leader>bb :Unite -silent buffer<CR>
+        nnoremap <silent><Leader>bB :Unite -silent -start-insert buffer<CR>
+        " Tabs
+        nnoremap <silent><Leader>bt :Unite -silent tab<CR>
+        nnoremap <silent><Leader>bT :Unite -silent -start-insert tab<CR>
+        " Grep
+        nnoremap <silent><Leader>ba :Unite -silent -no-quit grep<CR>
+        " Tasks
         nnoremap <silent><Leader>u; :Unite -silent -toggle
                     \ grep:%::FIXME\|TODO\|NOTE\|XXX\|COMBAK\|@todo<CR>
-
+        " Yank
+        nnoremap <silent><Leader>y :<C-u>Unite history/yank<CR>
         " menus
         let g:unite_source_menu_menus = {}
 
+        " Unite window mappings
+        autocmd Filetype unite call s:unite_my_settings()
+        function! s:unite_my_settings()
+            " Overwrite settings.
+
+            " Play nice with supertab
+            let b:SuperTabDisabled=1
+            " Enable navigation with control-j and control-k in insert mode
+            imap <buffer> <C-n>     <Plug>(unite_select_next_line)
+            nmap <buffer> <C-n>     <Plug>(unite_select_next_line)
+            imap <buffer> <C-p>     <Plug>(unite_select_previous_line)
+            nmap <buffer> <C-p>     <Plug>(unite_select_previous_line)
+
+            imap <buffer> jj        <Plug>(unite_insert_leave)
+            " imap <buffer> <C-w>        <Plug>(unite_delete_backward_path)
+
+            imap <buffer><expr> j   unite#smart_map('j', '')
+            imap <buffer> <TAB>     <Plug>(unite_select_next_line)
+            imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
+            imap <buffer> '     <Plug>(unite_quick_match_default_action)
+            nmap <buffer> '     <Plug>(unite_quick_match_default_action)
+            imap <buffer><expr> x
+                        \ unite#smart_map('x', "\<Plug>(unite_quick_match_choose_action)")
+            nmap <buffer> x     <Plug>(unite_quick_match_choose_action)
+            nmap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+            imap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
+            imap <buffer> <C-y>     <Plug>(unite_narrowing_path)
+            nmap <buffer> <C-y>     <Plug>(unite_narrowing_path)
+            nmap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
+            imap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
+            nmap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+            imap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
+            nnoremap <silent><buffer><expr> l
+                        \ unite#smart_map('l', unite#do_action('default'))
+
+            let unite = unite#get_current_unite()
+            if unite.profile_name ==# 'search'
+                nnoremap <silent><buffer><expr> r     unite#do_action('replace')
+            else
+                nnoremap <silent><buffer><expr> r     unite#do_action('rename')
+            endif
+
+            nnoremap <silent><buffer><expr> cd     unite#do_action('lcd')
+            nnoremap <buffer><expr> S      unite#mappings#set_current_filters(
+                        \ empty(unite#mappings#get_current_filters()) ?
+                        \ ['sorter_reverse'] : [])
+
+            " Runs "split" action by <C-s>.
+            imap <silent><buffer><expr> <C-s>     unite#do_action('split')
+            nmap <silent><buffer><expr> <C-s>     unite#do_action('split')
+            " Runs "vsplit" action by <C-v>.
+            imap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
+            nmap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
+        endfunction
+
+
     " }
 "}
+
+" Vim UI {
+
+    " Set colorscheme {
+        set background=dark
+        colorscheme solarized
+    " }
+
+    set showmode                    " Display the current mode
+
+    set cursorline                  " Highlight current line
+
+    highlight clear SignColumn      " SignColumn should match background
+    highlight clear LineNr          " Current line number row will have same background color in relative mode
+    "highlight clear CursorLineNr    " Remove highlight color from current line number
+
+    set linespace=0                 " No extra spaces between rows
+    set number                      " Line numbers on
+    set relativenumber              " Relative line numbers on
+    set showmatch                   " Show matching brackets/parenthesis
+    set hlsearch                    " Highlight search terms
+    set winminheight=0              " Windows can be 0 line high
+    set ignorecase                  " Case insensitive search
+    set smartcase                   " Case sensitive when uc present
+    set wildmenu                    " Show list instead of just completing
+    set wildmode=list:longest,full  " Command <Tab> completion, list matches, then longest common part, then all.
+    set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
+    set scrolljump=5                " Lines to scroll when cursor leaves screen
+    set foldenable                  " Auto fold code
+    set foldmethod=syntax           " Enable folding
+    set foldlevel=99
+    set list
+
+    augroup numbertoggle
+        autocmd!
+        autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+        autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+    augroup END
+" }
 
 " Functions {
 
@@ -723,4 +832,9 @@
     if filereadable(expand("~/.sivim/config/init.after.vim"))
         source ~/.sivim/config/init.after.vim
     endif
+" }
+
+" Modeline  {
+" vim: set sw=4 ts=8 sts=4 et tw=78 foldmarker={,} foldlevel=0 foldmethod=marker spell:
+"
 " }
