@@ -26,6 +26,7 @@
         call dein#add('easymotion/vim-easymotion')           " Move easier through the code
         call dein#add('christoomey/vim-tmux-navigator')
         call dein#add('tmux-plugins/vim-tmux-focus-events')
+        call dein#add('tmux-plugins/vim-tmux')
         " Unite dependencies:
         call dein#add('Shougo/vimproc.vim', {'build': 'make'})
         call dein#add('Shougo/unite.vim')
