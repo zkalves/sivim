@@ -143,6 +143,10 @@
     " Ignore whitespaces for diff
     set diffopt+=iwhite
 
+    if !has('nvim')
+        set viminfo+=~/.vim/viminfo
+    endif
+
     " Setting up the directories {
         set backup                  " Backups are nice ...
         if has('persistent_undo')
@@ -197,6 +201,8 @@
     " Flag unnecessary whitespace
     highlight BadWhitespace ctermbg=red guibg=darkred
     autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
+    autocmd BufRead,BufNewFile *.svh,*.svi set syntax=systemverilog
 " }
 
 " Key (re)Mappings {
@@ -265,10 +271,14 @@
             nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
             nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
         else
-            map <C-h> <C-W><C-h>
-            map <C-j> <C-W><C-j>
-            map <C-k> <C-W><C-k>
-            map <C-l> <C-W><C-l>
+            map <C-h> <C-W>h
+            map <C-j> <C-W>j
+            map <C-k> <C-W>k
+            map <C-l> <C-W>l
+            "map <C-h> <C-W><C-h>
+            "map <C-j> <C-W><C-j>
+            "map <C-k> <C-W><C-k>
+            "map <C-l> <C-W><C-l>
             "nnoremap <C-J> <C-W><C-J>
             "nnoremap <C-K> <C-W><C-K>
             "nnoremap <C-L> <C-W><C-L>
@@ -461,6 +471,9 @@
     " Miniyank
     map p <Plug>(miniyank-autoput)
     map P <Plug>(miniyank-autoPut)
+
+    " Trim whitespaces
+    nmap <leader>w :call StripTrailingWhitespace()<CR>
 " }
 
 " Plugin configuration {
