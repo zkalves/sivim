@@ -478,7 +478,7 @@
 
 " Plugin configuration {
     " Tabularize {
-        if isdirectory(expand("~/.sivim/plugins/repos/github.com/godlygeek/tabular"))
+        if isdirectory(expand("~/.sivim/dein/repos/github.com/godlygeek/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
@@ -504,7 +504,7 @@
             let g:pymode = 0
         endif
 
-        if isdirectory(expand("~/.sivim/plugins/repos/github.com/python-mode"))
+        if isdirectory(expand("~/.sivim/dein/repos/github.com/python-mode"))
             let g:pymode_lint_checkers = ['pyflakes']
             let g:pymode_trim_whitespaces = 0
             let g:pymode_options = 0
@@ -513,7 +513,7 @@
     " }
 
     " Fugitive {
-        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-fugitive"))
+        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-fugitive"))
             nnoremap <silent> <leader>gs :Gstatus<CR>
             nnoremap <silent> <leader>gd :Gdiff<CR>
             nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -530,7 +530,7 @@
     "}
 
     " indent_guides {
-        if isdirectory(expand("~/.sivim/plugins/repos/github.com/nathanaelkane/vim-indent-guides/"))
+        if isdirectory(expand("~/.sivim/dein/repos/github.com/nathanaelkane/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
             let g:indent_guides_enable_on_vim_startup = 1
@@ -546,7 +546,7 @@
 
         " See `:echo g:airline_theme_map` for some more choices
         " Default in terminal vim is 'dark'
-        if isdirectory(expand("~/.sivim/plugins/repos/github.com/vim-airline/vim-airline-themes/"))
+        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-airline/vim-airline-themes/"))
             let g:airline_powerline_fonts = 1
             if !exists('g:airline_theme')
                 let g:airline_theme = 'dark'
