@@ -1,7 +1,6 @@
 **/*~
 cache/*
-config/init.before.vim
-config/init.after.vim
+config/*
 
 dein/*
 vimbackup/*

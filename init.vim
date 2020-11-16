@@ -27,9 +27,9 @@
         call dein#add('christoomey/vim-tmux-navigator')
         call dein#add('tmux-plugins/vim-tmux-focus-events')
         call dein#add('tmux-plugins/vim-tmux')
-        " Unite dependencies:
+        " Unite dependencies: TODO Replace with denite
         call dein#add('Shougo/vimproc.vim', {'build': 'make'})
-        call dein#add('Shougo/unite.vim')
+        call dein#add('Shougo/unite.vim')  
         call dein#add('Shougo/neomru.vim')
         call dein#add('Shougo/neoyank.vim')
         call dein#add('Shougo/unite-outline')
@@ -533,7 +533,7 @@
         if isdirectory(expand("~/.sivim/dein/repos/github.com/nathanaelkane/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
-            let g:indent_guides_enable_on_vim_startup = 1
+            let g:indent_guides_enable_on_vim_startup = 0
         endif
     " }
 
