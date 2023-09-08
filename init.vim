@@ -225,6 +225,9 @@
     " Update plugins on startup
     noremap <leader>du :call dein#update()<CR>
 
+    " List and change buffer
+    nnoremap <leader>ls :ls<CR>:b
+
     " Change background color
     noremap <leader>bg :call ToggleBG()<CR>
     noremap <leader>bc :call SwitchCTRST()<CR>
@@ -271,10 +274,10 @@
             nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
             nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
         else
-            map <C-h> <C-W>h
-            map <C-j> <C-W>j
-            map <C-k> <C-W>k
-            map <C-l> <C-W>l
+            map <C-h> <C-w>h
+            map <C-j> <C-w>j
+            map <C-k> <C-w>k
+            map <C-l> <C-w>l
             "map <C-h> <C-W><C-h>
             "map <C-j> <C-W><C-j>
             "map <C-k> <C-W><C-k>
@@ -419,6 +422,10 @@
     map zl zL
     map zh zH
 
+    " Vertical scroll to next non whitespace character
+    nnoremap cd /\%<C-R>=virtcol(".")<CR>v\S<CR>
+    nnoremap cu ?\%<C-R>=virtcol(".")<CR>v\S<CR>
+
     " Easier formatting
     nnoremap <silent> <leader>q gwip
 
@@ -474,6 +481,10 @@
 
     " Trim whitespaces
     nmap <leader>w :call StripTrailingWhitespace()<CR>
+
+    " linediff
+    noremap \ldt :Linediff<CR>
+    noremap \ldo :LinediffReset<CR>
 " }
 
 " Plugin configuration {
