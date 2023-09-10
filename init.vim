@@ -456,7 +456,7 @@
 
 " Plugin configuration {
     " Tabularize {
-        if isdirectory(expand("~/.sivim/dein/repos/github.com/godlygeek/tabular"))
+        if isdirectory(expand("~/.sivim/plugged/tabular"))
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
