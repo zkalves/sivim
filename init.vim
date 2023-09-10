@@ -5,47 +5,28 @@
 " }
 
 "" Plugin manager {
-    " Plugins will be downloaded under the specified directory.
-    set runtimepath+=~/.sivim/dein/repos/github.com/Shougo/dein.vim
-    let g:dein#install_process_timeout = 3600 * 2
-    if dein#load_state('~/.sivim/dein')
-        call dein#begin('~/.sivim/dein')
-        call dein#add('Shougo/dein.vim')
-        " Declare the list of plugins.
-        call dein#add('altercation/vim-colors-solarized', {'merged': 0})    " Default colorscheme
-        call dein#add('godlygeek/tabular')                   " Text alignment
-        call dein#add('nathanaelkane/vim-indent-guides')     " Visually display indent levels
-        call dein#add('python-mode/python-mode')            " Convert neovim in a Python IDE
-        call dein#add('scrooloose/nerdcommenter')            " Comment functions
-        call dein#add('tmhedberg/SimpylFold')                " Code folding for python
-        call dein#add('tpope/vim-fugitive')                  " Git wrapper
-        call dein#add('tpope/vim-sensible')                  " Basic configs
-        call dein#add('vim-airline/vim-airline')             " status line
-        call dein#add('vim-airline/vim-airline-themes')      " Themes for airline
-        call dein#add('vim-syntastic/syntastic')             " Syntax checker
-        call dein#add('easymotion/vim-easymotion')           " Move easier through the code
-        call dein#add('christoomey/vim-tmux-navigator')
-        call dein#add('tmux-plugins/vim-tmux-focus-events')
-        call dein#add('tmux-plugins/vim-tmux')
-        " Unite dependencies: TODO Replace with denite
-        call dein#add('Shougo/vimproc.vim', {'build': 'make'})
-        call dein#add('Shougo/unite.vim')  
-        call dein#add('Shougo/neomru.vim')
-        call dein#add('Shougo/neoyank.vim')
-        call dein#add('Shougo/unite-outline')
-        call dein#add('tsukkee/unite-tag')
+    call plug#begin('~/.sivim/plugged')
+"        " Declare the list of plugins.
+        Plug 'altercation/vim-colors-solarized'    " Default colorscheme
+        Plug 'godlygeek/tabular'                   " Text alignment
+        Plug 'nathanaelkane/vim-indent-guides'     " Visually display indent levels
+        Plug 'python-mode/python-mode'             " Convert neovim in a Python IDE
+        Plug 'scrooloose/nerdcommenter'            " Comment functions
+        Plug 'tmhedberg/SimpylFold'                " Code folding for python
+        Plug 'tpope/vim-fugitive'                  " Git wrapper
+        Plug 'tpope/vim-sensible'                  " Basic configs
+        Plug 'vim-airline/vim-airline'             " status line
+        Plug 'vim-airline/vim-airline-themes'      " Themes for airline
+        Plug 'vim-syntastic/syntastic'             " Syntax checker
+        Plug 'easymotion/vim-easymotion'           " Move easier through the code
+        Plug 'christoomey/vim-tmux-navigator'
+        Plug 'tmux-plugins/vim-tmux-focus-events'
+        Plug 'tmux-plugins/vim-tmux'
         " Verilog plugins
-        call dein#add('vhda/verilog_systemverilog.vim')
-        call dein#add('bfredl/nvim-miniyank')
-        " List ends here. Plugins become visible to Vim after this call.
-        call dein#end()
-        call dein#save_state()
-    endif
-
-    " Install missing plugins
-    if dein#check_install()
-        call dein#install()
-    endif
+        Plug 'vhda/verilog_systemverilog.vim'
+        Plug 'bfredl/nvim-miniyank'
+    " Initialize plugin system
+    call plug#end()
 "" }
 
 " General {
@@ -143,10 +124,6 @@
     " Ignore whitespaces for diff
     set diffopt+=iwhite
 
-    if !has('nvim')
-        set viminfo+=~/.vim/viminfo
-    endif
-
     " Setting up the directories {
         set backup                  " Backups are nice ...
         if has('persistent_undo')
@@ -187,16 +164,6 @@
     "   let g:sivim_keep_trailing_whitespace = 1
     autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql,verilog,systemverilog autocmd BufWritePre <buffer> if !exists('g:sivim_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
     "autocmd FileType go autocmd BufWritePre <buffer> Fmt
-    autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
-    autocmd FileType haskell,puppet,ruby,yml setlocal expandtab shiftwidth=2 softtabstop=2
-    " preceding line best in a plugin but here for now.
-
-    autocmd BufNewFile,BufRead *.coffee set filetype=coffee
-
-    " Workaround vim-commentary for Haskell
-    autocmd FileType haskell setlocal commentstring=--\ %s
-    " Workaround broken colour highlighting in Haskell
-    autocmd FileType haskell,rust setlocal nospell
 
     " Flag unnecessary whitespace
     highlight BadWhitespace ctermbg=red guibg=darkred
@@ -523,22 +490,22 @@
         endif
     " }
 
-    " Fugitive {
-        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-fugitive"))
-            nnoremap <silent> <leader>gs :Gstatus<CR>
-            nnoremap <silent> <leader>gd :Gdiff<CR>
-            nnoremap <silent> <leader>gc :Gcommit<CR>
-            nnoremap <silent> <leader>gb :Gblame<CR>
-            nnoremap <silent> <leader>gl :Glog<CR>
-            nnoremap <silent> <leader>gp :Git push<CR>
-            nnoremap <silent> <leader>gr :Gread<CR>
-            nnoremap <silent> <leader>gw :Gwrite<CR>
-            nnoremap <silent> <leader>ge :Gedit<CR>
-            " Mnemonic _i_nteractive
-            nnoremap <silent> <leader>gi :Git add -p %<CR>
-            nnoremap <silent> <leader>gg :SignifyToggle<CR>
-        endif
-    "}
+"    " Fugitive {
+"        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-fugitive"))
+"            nnoremap <silent> <leader>gs :Gstatus<CR>
+"            nnoremap <silent> <leader>gd :Gdiff<CR>
+"            nnoremap <silent> <leader>gc :Gcommit<CR>
+"            nnoremap <silent> <leader>gb :Gblame<CR>
+"            nnoremap <silent> <leader>gl :Glog<CR>
+"            nnoremap <silent> <leader>gp :Git push<CR>
+"            nnoremap <silent> <leader>gr :Gread<CR>
+"            nnoremap <silent> <leader>gw :Gwrite<CR>
+"            nnoremap <silent> <leader>ge :Gedit<CR>
+"            " Mnemonic _i_nteractive
+"            nnoremap <silent> <leader>gi :Git add -p %<CR>
+"            nnoremap <silent> <leader>gg :SignifyToggle<CR>
+"        endif
+"    "}
 
     " indent_guides {
         if isdirectory(expand("~/.sivim/dein/repos/github.com/nathanaelkane/vim-indent-guides/"))

@@ -2,8 +2,11 @@
 cache/*
 config/*
 
-dein/*
 vimbackup/*
 vimswap/*
 vimundo/*
 vimviews/*
+.netrwhist
+plugged/*
+spell/*
+
