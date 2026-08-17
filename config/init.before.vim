@@ -12,3 +12,6 @@ let g:syntastic_c_checkers = []
 let g:syntastic_cpp_checkers = []
 
 "let g:miniyank_filename = "/tmp/".$USER."_miniyank.mpack"
+if executable('python3')
+    let g:python3_host_prog = exepath('python3')
+endif

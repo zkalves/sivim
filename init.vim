@@ -10,21 +10,37 @@
         Plug 'altercation/vim-colors-solarized'    " Default colorscheme
         Plug 'godlygeek/tabular'                   " Text alignment
         Plug 'nathanaelkane/vim-indent-guides'     " Visually display indent levels
-        Plug 'python-mode/python-mode'             " Convert neovim in a Python IDE
-        Plug 'scrooloose/nerdcommenter'            " Comment functions
         Plug 'tmhedberg/SimpylFold'                " Code folding for python
         Plug 'tpope/vim-fugitive'                  " Git wrapper
         Plug 'tpope/vim-sensible'                  " Basic configs
-        Plug 'vim-airline/vim-airline'             " status line
-        Plug 'vim-airline/vim-airline-themes'      " Themes for airline
-        Plug 'vim-syntastic/syntastic'             " Syntax checker
+        Plug 'itchyny/lightline.vim'               " statusline
+        Plug 'dense-analysis/ale'                  " Async lint engine (replaces syntastic)
+        Plug 'maximbaz/lightline-ale'              " Show ALE status in lightline
         Plug 'easymotion/vim-easymotion'           " Move easier through the code
         Plug 'christoomey/vim-tmux-navigator'
         Plug 'tmux-plugins/vim-tmux-focus-events'
         Plug 'tmux-plugins/vim-tmux'
         " Verilog plugins
         Plug 'vhda/verilog_systemverilog.vim'
-        Plug 'bfredl/nvim-miniyank'
+
+        " Yank/paste ring: Neovim gets the actively maintained Lua plugin,
+        " plain Vim falls back to nvim-miniyank (upstream unmaintained since
+        " 2019 but still functional for basic use)
+        if has('nvim')
+            Plug 'gbprod/yanky.nvim'
+        else
+            Plug 'bfredl/nvim-miniyank'
+        endif
+
+        " Commenting: Neovim gets the actively maintained Lua plugin,
+        " plain Vim uses the maintained nerdcommenter fork (upstream
+        " scrooloose/nerdcommenter is no longer maintained)
+        if has('nvim')
+            Plug 'numToStr/Comment.nvim'
+        else
+            Plug 'preservim/nerdcommenter'
+        endif
+
     " Initialize plugin system
     call plug#end()
 "" }
@@ -40,31 +56,6 @@
         else
             set background=dark
         endif
-    endfunction
-
-    function! SwitchCTRST()
-        let s:color_name = g:colors_name
-        let s:tbg = &background
-        if s:tbg == "dark"
-            let s:sctrst = g:gruvbox_contrast_dark
-        else
-            let s:sctrst = g:gruvbox_contrast_light
-        endif
-
-        if s:sctrst == "medium"
-            let s:sctrst = 'soft'
-        elseif s:sctrst == "soft"
-            let s:sctrst = 'hard'
-        else
-            let s:sctrst = 'medium'
-        endif
-
-        if s:tbg == "dark"
-            let g:gruvbox_contrast_dark = s:sctrst
-        else
-            let g:gruvbox_contrast_light = s:sctrst
-        endif
-        exe "colorscheme " . s:color_name
     endfunction
 
     set mouse=a                 " Automatically enable mouse usage
@@ -149,9 +140,9 @@
 
     set nowrap                      " Do not wrap long lines
     set expandtab                   " Tabs are spaces, not tabs
-    set tabstop=4                   " An indentation every four columns
-    set softtabstop=4               " Let backspace delete indent
-    set shiftwidth=4                " Use indents of 4 spaces
+    set tabstop=2                   " An indentation every two columns
+    set softtabstop=2               " Let backspace delete indent
+    set shiftwidth=2                " Use indents of 2 spaces
     set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
     set splitright                  " Puts new vsplit windows to the right of the current
     set splitbelow                  " Puts new split windows to the bottom of the current
@@ -189,15 +180,11 @@
         let maplocalleader=g:sivim_localleader
     endif
 
-    " Update plugins on startup
-    noremap <leader>du :call dein#update()<CR>
-
     " List and change buffer
     nnoremap <leader>ls :ls<CR>:b
 
     " Change background color
     noremap <leader>bg :call ToggleBG()<CR>
-    noremap <leader>bc :call SwitchCTRST()<CR>
 
     " The default mappings for editing and applying the sivim configuration
     " are <leader>ev and <leader>sv respectively. Change them to your preference
@@ -355,9 +342,6 @@
     endif
 
     " Shortcuts
-    " Change Working Directory to that of the current file
-    cmap cwd lcd %:p:h
-    cmap cd. lcd %:p:h
 
     " Visual shifting (does not exit Visual mode)
     vnoremap < <gv
@@ -437,14 +421,21 @@
     vnoremap <Leader>rv c<C-O>:set revins<CR><C-R>"<Esc>:set norevins<CR>
 
     " Retab from 8 spaces tabs to 3 whitespaces
-    nmap <leader>rt :set tabstop=8 <bar> :retab <bar> :set tabstop=3 <cr>
+    nmap <leader>rt :set tabstop=8 <bar> :retab <bar> :set tabstop=2 <cr>
 
     " Disable F1 help
     nmap <F1> <nop>
 
-    " Miniyank
-    map p <Plug>(miniyank-autoput)
-    map P <Plug>(miniyank-autoPut)
+    " Yank/paste ring
+    if has('nvim')
+        map p <Plug>(YankyPutAfter)
+        map P <Plug>(YankyPutBefore)
+        nmap <c-n> <Plug>(YankyCycleForward)
+        nmap <c-p> <Plug>(YankyCycleBackward)
+    else
+        map p <Plug>(miniyank-autoput)
+        map P <Plug>(miniyank-autoPut)
+    endif
 
     " Trim whitespaces
     nmap <leader>w :call StripTrailingWhitespace()<CR>
@@ -457,6 +448,10 @@
 " Plugin configuration {
     " Tabularize {
         if isdirectory(expand("~/.sivim/plugged/tabular"))
+            command! -range AlignBrackets
+              \ execute <line1>.','.<line2>.'Tabularize /('
+              \ | execute <line1>.','.<line2>.'Tabularize /.*\zs)/l1l0'
+
             nmap <Leader>a& :Tabularize /&<CR>
             vmap <Leader>a& :Tabularize /&<CR>
             nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
@@ -473,25 +468,18 @@
             vmap <Leader>a,, :Tabularize /,\zs<CR>
             nmap <Leader>a<Bar> :Tabularize /<Bar><CR>
             vmap <Leader>a<Bar> :Tabularize /<Bar><CR>
-        endif
-    " }
+            nmap <Leader>a( :Tabularize /(<CR>
+            vmap <Leader>a( :Tabularize /(<CR>
+            nmap <Leader>a) :Tabularize /.*\zs)/l1l0<CR>
+            vmap <Leader>a) :Tabularize /.*\zs)/l1l0<CR>
+            nmap <Leader>ab :AlignBrackets<CR>
+            vmap <Leader>ab :AlignBrackets<CR>
 
-    " PyMode {
-        " Disable if python support not present
-        if !has('python') && !has('python3')
-            let g:pymode = 0
-        endif
-
-        if isdirectory(expand("~/.sivim/dein/repos/github.com/python-mode"))
-            let g:pymode_lint_checkers = ['pyflakes']
-            let g:pymode_trim_whitespaces = 0
-            let g:pymode_options = 0
-            let g:pymode_rope = 0
         endif
     " }
 
 "    " Fugitive {
-"        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-fugitive"))
+"        if isdirectory(expand("~/.sivim/plugged/vim-fugitive"))
 "            nnoremap <silent> <leader>gs :Gstatus<CR>
 "            nnoremap <silent> <leader>gd :Gdiff<CR>
 "            nnoremap <silent> <leader>gc :Gcommit<CR>
@@ -508,172 +496,68 @@
 "    "}
 
     " indent_guides {
-        if isdirectory(expand("~/.sivim/dein/repos/github.com/nathanaelkane/vim-indent-guides/"))
+        if isdirectory(expand("~/.sivim/plugged/vim-indent-guides/"))
             let g:indent_guides_start_level = 2
             let g:indent_guides_guide_size = 1
             let g:indent_guides_enable_on_vim_startup = 0
         endif
     " }
 
-    " vim-airline {
-        " Set configuration options for the statusline plugin vim-airline.
-        " Use the powerline theme and optionally enable powerline symbols.
-        " Uses the symbols , , , , , , and .in the statusline.
-        " If the previous symbols do not render for you then install a
-        " powerline enabled font.
+    "" lightline {
+        set laststatus=2
+        set noshowmode
+    "" }
 
-        " See `:echo g:airline_theme_map` for some more choices
-        " Default in terminal vim is 'dark'
-        if isdirectory(expand("~/.sivim/dein/repos/github.com/vim-airline/vim-airline-themes/"))
-            let g:airline_powerline_fonts = 1
-            if !exists('g:airline_theme')
-                let g:airline_theme = 'dark'
-            endif
-            if !exists('g:airline_symbols')
-                let g:airline_symbols = {}
-            endif
+    " ALE (replaces syntastic) {
+        let g:ale_lint_on_text_changed = 'normal'
+        let g:ale_lint_on_insert_leave = 1
+        let g:ale_sign_column_always = 1
 
-            " unicode symbols
-            let g:airline_left_sep = '»'
-            let g:airline_left_sep = '▶'
-            let g:airline_right_sep = '«'
-            let g:airline_right_sep = '◀'
-            let g:airline_symbols.linenr = '␊'
-            let g:airline_symbols.linenr = '␤'
-            let g:airline_symbols.linenr = '¶'
-            let g:airline_symbols.branch = '⎇'
-            let g:airline_symbols.paste = 'ρ'
-            let g:airline_symbols.paste = 'Þ'
-            let g:airline_symbols.paste = '∥'
-            let g:airline_symbols.whitespace = 'Ξ'
+        " Python: pip install --user 'python-lsp-server[all]' pulls in
+        " flake8 (pyflakes + pycodestyle + mccabe) and pylint as CLI tools;
+        " ALE calls them directly, no LSP client/server needed.
+        let g:ale_linters = { 'python': ['flake8', 'pylint'] }
 
-            " airline symbols
-            let g:airline_left_sep = ''
-            let g:airline_left_alt_sep = ''
-            let g:airline_right_sep = ''
-            let g:airline_right_alt_sep = ''
-            let g:airline_symbols.branch = ''
-            let g:airline_symbols.readonly = ''
-            let g:airline_symbols.linenr = ''
-            "" Use the default set of separators with a few customizations
-            "let g:airline_left_sep='›'  " Slightly fancier than '>'
-            "let g:airline_right_sep='‹' " Slightly fancier than '<'
+        " lightline-ale: show ALE status in the statusline
+        let g:lightline#ale#indicator_checking = "•••"
+        let g:lightline#ale#indicator_infos = "ℹ"
+        let g:lightline#ale#indicator_warnings = "⚠"
+        let g:lightline#ale#indicator_errors = "✗"
+        let g:lightline#ale#indicator_ok = "✓"
+
+        let g:lightline = {
+            \ 'active': {
+            \   'right': [ [ 'lineinfo' ],
+            \              [ 'percent' ],
+            \              [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok' ] ]
+            \ },
+            \ 'component_expand': {
+            \   'linter_checking': 'lightline#ale#checking',
+            \   'linter_infos': 'lightline#ale#infos',
+            \   'linter_warnings': 'lightline#ale#warnings',
+            \   'linter_errors': 'lightline#ale#errors',
+            \   'linter_ok': 'lightline#ale#ok',
+            \ },
+            \ 'component_type': {
+            \   'linter_checking': 'right',
+            \   'linter_infos': 'right',
+            \   'linter_warnings': 'warning',
+            \   'linter_errors': 'error',
+            \   'linter_ok': 'right',
+            \ },
+            \ }
+    " }
+
+    " Yank/paste ring {
+        if has('nvim')
+            lua pcall(function() require('yanky').setup() end)
         endif
     " }
 
-    " vim-syntastic {
-        set statusline+=%#warningmsg#
-        set statusline+=%{SyntasticStatuslineFlag()}
-        set statusline+=%*
-
-        let g:syntastic_always_populate_loc_list = 1
-        let g:syntastic_auto_loc_list = 1
-        let g:syntastic_check_on_open = 1
-        let g:syntastic_check_on_wq = 0
-    " }
-
-    " Unite {
-        let g:unite_source_codesearch_ignore_case = 1
-        let g:unite_enable_start_insert = 0
-        let g:unite_enable_short_source_mes = 0
-        let g:unite_force_overwrite_statusline = 0
-        let g:unite_prompt = '>>> '
-        let g:unite_marked_icon = '✓'
-        let g:unite_candidate_icon = '∘'
-        let g:unite_winheight = 15
-        let g:unite_update_time = 200
-        let g:unite_split_rule = 'botright'
-        let g:unite_source_buffer_time_format = '(%d-%m-%Y %H:%M:%S) '
-        let g:unite_source_file_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
-        let g:unite_source_directory_mru_time_format = '(%d-%m-%Y %H:%M:%S) '
-        let g:unite_data_directory='~/.sivim/cache/unite'
-        let g:unite_source_history_yank_enable=1
-        if executable('ag')
-            let g:unite_source_grep_command = 'ag'
-            let g:unite_source_grep_default_opts='-i -r --line-numbers --nocolor --nogroup -S'
-            let g:unite_source_grep_recursive_opt = ''
+    " Commenting {
+        if has('nvim')
+            lua pcall(function() require('Comment').setup() end)
         endif
-
-        " Files
-        nnoremap <silent><Leader>bo :Unite -silent file<CR>
-        nnoremap <silent><Leader>bO :Unite -silent -start-insert file<CR>
-        " Files recursive
-        nnoremap <silent><Leader>br :Unite -silent file_rec/async<CR>
-        nnoremap <silent><Leader>bR :Unite -silent -start-insert file_rec/async<CR>
-        " Most recent
-        nnoremap <silent><Leader>bm :Unite -silent file_mru<CR>
-        " Buffers
-        nnoremap <silent><Leader>bb :Unite -silent buffer<CR>
-        nnoremap <silent><Leader>bB :Unite -silent -start-insert buffer<CR>
-        " Tabs
-        nnoremap <silent><Leader>bt :Unite -silent tab<CR>
-        nnoremap <silent><Leader>bT :Unite -silent -start-insert tab<CR>
-        " Grep
-        nnoremap <silent><Leader>ba :Unite -silent -no-quit grep<CR>
-        " Tasks
-        nnoremap <silent><Leader>u; :Unite -silent -toggle
-                    \ grep:%::FIXME\|TODO\|NOTE\|XXX\|COMBAK\|@todo<CR>
-        " Yank
-        nnoremap <silent><Leader>y :<C-u>Unite history/yank<CR>
-        " menus
-        let g:unite_source_menu_menus = {}
-
-        " Unite window mappings
-        autocmd Filetype unite call s:unite_my_settings()
-        function! s:unite_my_settings()
-            " Overwrite settings.
-
-            " Play nice with supertab
-            let b:SuperTabDisabled=1
-            " Enable navigation with control-j and control-k in insert mode
-            imap <buffer> <C-n>     <Plug>(unite_select_next_line)
-            nmap <buffer> <C-n>     <Plug>(unite_select_next_line)
-            imap <buffer> <C-p>     <Plug>(unite_select_previous_line)
-            nmap <buffer> <C-p>     <Plug>(unite_select_previous_line)
-
-            imap <buffer> jj        <Plug>(unite_insert_leave)
-            " imap <buffer> <C-w>        <Plug>(unite_delete_backward_path)
-
-            imap <buffer><expr> j   unite#smart_map('j', '')
-            imap <buffer> <TAB>     <Plug>(unite_select_next_line)
-            imap <buffer> <C-w>     <Plug>(unite_delete_backward_path)
-            imap <buffer> '     <Plug>(unite_quick_match_default_action)
-            nmap <buffer> '     <Plug>(unite_quick_match_default_action)
-            imap <buffer><expr> x
-                        \ unite#smart_map('x', "\<Plug>(unite_quick_match_choose_action)")
-            nmap <buffer> x     <Plug>(unite_quick_match_choose_action)
-            nmap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
-            imap <buffer> <C-z>     <Plug>(unite_toggle_transpose_window)
-            imap <buffer> <C-y>     <Plug>(unite_narrowing_path)
-            nmap <buffer> <C-y>     <Plug>(unite_narrowing_path)
-            nmap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
-            imap <buffer> <C-e>     <Plug>(unite_toggle_auto_preview)
-            nmap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
-            imap <buffer> <C-r>     <Plug>(unite_narrowing_input_history)
-            nnoremap <silent><buffer><expr> l
-                        \ unite#smart_map('l', unite#do_action('default'))
-
-            let unite = unite#get_current_unite()
-            if unite.profile_name ==# 'search'
-                nnoremap <silent><buffer><expr> r     unite#do_action('replace')
-            else
-                nnoremap <silent><buffer><expr> r     unite#do_action('rename')
-            endif
-
-            nnoremap <silent><buffer><expr> cd     unite#do_action('lcd')
-            nnoremap <buffer><expr> S      unite#mappings#set_current_filters(
-                        \ empty(unite#mappings#get_current_filters()) ?
-                        \ ['sorter_reverse'] : [])
-
-            " Runs "split" action by <C-s>.
-            imap <silent><buffer><expr> <C-s>     unite#do_action('split')
-            nmap <silent><buffer><expr> <C-s>     unite#do_action('split')
-            " Runs "vsplit" action by <C-v>.
-            imap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
-            nmap <silent><buffer><expr> <C-v>     unite#do_action('vsplit')
-        endfunction
-
-
     " }
 "}
 
@@ -683,8 +567,6 @@
         set background=dark
         colorscheme solarized
     " }
-
-    set showmode                    " Display the current mode
 
     set cursorline                  " Highlight current line
 

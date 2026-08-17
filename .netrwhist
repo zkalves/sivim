@@ -1,3 +1,8 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =1
-let g:netrw_dirhist_1='/home/eze/projects/rmap/src'
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/home/ezequielalves/projects/pqs-utils/verification/examples/simple/work/regressions/regression_20231206_1023291243_34494/scripts'
+let g:netrw_dirhist_2='/home/ezequielalves/projects/pqs-utils/verification/examples/simple/work/regressions/regression_20231206_1023291243_34494/test_0'
+let g:netrw_dirhist_3='/home/ezequielalves/projects/pqs-hw-core-tools/python_libs/pqshield/c'
+let g:netrw_dirhist_4='/home/ezequielalves/projects/pqs-hw-core-tools/python_libs/pqshield/html'
+let g:netrw_dirhist_5='/home/ezequielalves/projects/pqs-hw-core-tools/python_libs/pqshield/templates'
+let g:netrw_dirhist_6='/home/ezequielalves/projects/pqs-hw-blaze-dev/doc/gitlab-pages'

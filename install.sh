@@ -107,18 +107,18 @@ install_vim () {
 
 # install_package_manager {{{
 install_package_manager () {
-  # dein package manager
-  if [[ ! -d "$HOME/.sivim/dein/repos/github.com/Shougo/dein.vim" ]]; then
-    info "Install dein.vim"
-    git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/dein/repos/github.com/Shougo/dein.vim
-    success "dein.vim installation done"
-  fi
+  ## dein package manager
+  #if [[ ! -d "$HOME/.sivim/dein/repos/github.com/Shougo/dein.vim" ]]; then
+  #  info "Install dein.vim"
+  #  git clone https://github.com/Shougo/dein.vim.git $HOME/.sivim/dein/repos/github.com/Shougo/dein.vim
+  #  success "dein.vim installation done"
+  #fi
 
-  ## vim-plug package manager
-  #info "Install vim-plug package manager"
-  #curl -sfLo ~/.sivim/autoload/plug.vim --create-dirs \
-  #  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  #success "vim-plug installation done"
+  # vim-plug package manager
+  info "Install vim-plug package manager"
+  curl -sfLo ~/.sivim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  success "vim-plug installation done"
 }
 # }}}
 
