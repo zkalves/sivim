@@ -20,6 +20,7 @@
         Plug 'christoomey/vim-tmux-navigator'
         Plug 'tmux-plugins/vim-tmux-focus-events'
         Plug 'tmux-plugins/vim-tmux'
+        Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
         " Verilog plugins
         Plug 'vhda/verilog_systemverilog.vim'
 
@@ -160,7 +161,15 @@
     highlight BadWhitespace ctermbg=red guibg=darkred
     autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 
-    autocmd BufRead,BufNewFile *.svh,*.svi set syntax=systemverilog
+    " Built-in detection maps *.sv/*.svh to the stock 'systemverilog'
+    " filetype; this runs after detection and forces the filetype provided
+    " by verilog_systemverilog.vim, which has the richer syntax, indent and
+    " instance navigation.
+    augroup sivim_verilog_filetype
+        autocmd!
+        autocmd BufNewFile,BufRead *.v,*.vh,*.vp,*.sv,*.svi,*.svh,*.svp,*.sva
+            \ setlocal filetype=verilog_systemverilog
+    augroup END
 " }
 
 " Key (re)Mappings {
@@ -516,7 +525,19 @@
         " Python: pip install --user 'python-lsp-server[all]' pulls in
         " flake8 (pyflakes + pycodestyle + mccabe) and pylint as CLI tools;
         " ALE calls them directly, no LSP client/server needed.
-        let g:ale_linters = { 'python': ['flake8', 'pylint'] }
+        " ALE looks g:ale_linters up by the buffer's own filetype, so every
+        " Verilog filetype needs its own entry. verible-verilog-ls lints a
+        " single file without elaborating it, so it does not report
+        " unresolved modules, packages or includes that live in other
+        " directories. Override with g:sivim_verilog_linters in
+        " ~/.sivim/config/init.before.vim.
+        let s:verilog_linters = get(g:, 'sivim_verilog_linters', ['verible_ls'])
+        let g:ale_linters = {
+            \   'python': ['flake8', 'pylint'],
+            \   'verilog': s:verilog_linters,
+            \   'systemverilog': s:verilog_linters,
+            \   'verilog_systemverilog': s:verilog_linters,
+            \ }
 
         " lightline-ale: show ALE status in the statusline
         let g:lightline#ale#indicator_checking = "•••"
@@ -524,6 +545,40 @@
         let g:lightline#ale#indicator_warnings = "⚠"
         let g:lightline#ale#indicator_errors = "✗"
         let g:lightline#ale#indicator_ok = "✓"
+
+        " SystemVerilog. Every Verilog linter is registered by ALE under the
+        " 'verilog' filetype, so its options live in the g:ale_verilog_*
+        " namespace whatever the buffer's filetype is.
+        let g:ale_verilog_verible_ls_rules =
+            \ '-explicit-parameter-storage-type,line-length=length:150'
+
+        " Build verible.filelist at the repository root from
+        " flow/manifests/*.f, which is how verible-verilog-ls resolves
+        " symbols defined in other directories. With no argument every
+        " manifest is used; otherwise name one, e.g. :VeribleFilelist
+        " pqs_flare_config_7
+        command! -nargs=* -complete=customlist,sivim#verible#Complete
+            \ VeribleFilelist call sivim#verible#Generate(<f-args>)
+        let g:ale_verilog_xvlog_options = '-sv'
+
+        " Elaborating linters (verilator, xvlog, iverilog) resolve cross-file
+        " references only from the directories given here. List the project's
+        " include and library directories in ~/.sivim/config/init.before.vim
+        " as g:sivim_verilog_incdirs; entries are expanded, so $VARs and ~
+        " may be used.
+        let s:verilog_incdirs = map(
+            \ copy(get(g:, 'sivim_verilog_incdirs', [])), 'expand(v:val)')
+        if !empty(s:verilog_incdirs)
+            let g:ale_verilog_verilator_options = join(map(
+                \ copy(s:verilog_incdirs), '"-I" . v:val . " -y " . v:val'))
+            let g:ale_verilog_iverilog_options = join(map(
+                \ copy(s:verilog_incdirs), '"-I" . v:val . " -y" . v:val'))
+            let g:ale_verilog_xvlog_options .= ' ' . join(map(
+                \ copy(s:verilog_incdirs), '"-i " . v:val'))
+
+            " Jump to a definition in another directory with gf / :find.
+            let &path = &path . ',' . join(s:verilog_incdirs, ',')
+        endif
 
         let g:lightline = {
             \ 'active': {
@@ -559,7 +614,6 @@
             lua pcall(function() require('Comment').setup() end)
         endif
     " }
-"}
 
 " Vim UI {
 
