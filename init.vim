@@ -20,6 +20,7 @@
         Plug 'christoomey/vim-tmux-navigator'
         Plug 'tmux-plugins/vim-tmux-focus-events'
         Plug 'tmux-plugins/vim-tmux'
+        Plug 'tpope/vim-obsession'                 " Session tracking, read by tmux-resurrect
         Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
         " Verilog plugins
         Plug 'vhda/verilog_systemverilog.vim'
@@ -41,6 +42,12 @@
         else
             Plug 'preservim/nerdcommenter'
         endif
+
+    " vim-tmux-navigator claims <C-h/j/k/l> and <C-\>. init.before.vim has
+    " already been sourced, so honour its opt-out before the plugin maps them.
+    if exists('g:sivim_no_easyWindows')
+        let g:tmux_navigator_no_mappings = 1
+    endif
 
     " Initialize plugin system
     call plug#end()
@@ -211,46 +218,14 @@
         let s:sivim_apply_config_mapping = g:sivim_apply_config_mapping
     endif
 
-    " Easier moving in tabs and windows
-    " The lines conflict with the default digraph mapping of <C-K>
-    " If you prefer that functionality, add the following to your
-    " ~/.sivim/config/init.before.vim file:
+    " Easier moving in tabs and windows is handled by vim-tmux-navigator,
+    " which maps <C-h/j/k/l> and <C-\>. Inside tmux those cross pane borders;
+    " outside it they fall back to plain window switching. The matching half
+    " lives in .tmux.conf, which forwards the keys only when the pane is
+    " running vim.
+    " These conflict with the default digraph mapping of <C-K>. To keep that,
+    " add the following to your ~/.sivim/config/init.before.vim file:
     "   let g:sivim_no_easyWindows = 1
-    if !exists('g:sivim_no_easyWindows')
-        " Tmux
-        if exists ('$TMUX')
-            function! TmuxOrSplitSwitch(wincmd, tmuxdir)
-                let previous_winnr = winnr()
-                silent! execute "wincmd " . a:wincmd
-                if previous_winnr == winnr()
-                    call system("tmux select-pane -" . a:tmuxdir)
-                    redraw!
-                endif
-            endfunction
-
-            let previous_title = substitute(system("tmux display-message -p '#{pane_title}'"), '\n', '', '')
-            let &t_ti = "\<Esc>]2;vim\<Esc>\\" . &t_ti
-            let &t_te = "\<Esc>]2;". previous_title . "\<Esc>\\" . &t_te
-
-            nnoremap <silent> <C-h> :call TmuxOrSplitSwitch('h', 'L')<cr>
-            nnoremap <silent> <C-j> :call TmuxOrSplitSwitch('j', 'D')<cr>
-            nnoremap <silent> <C-k> :call TmuxOrSplitSwitch('k', 'U')<cr>
-            nnoremap <silent> <C-l> :call TmuxOrSplitSwitch('l', 'R')<cr>
-        else
-            map <C-h> <C-w>h
-            map <C-j> <C-w>j
-            map <C-k> <C-w>k
-            map <C-l> <C-w>l
-            "map <C-h> <C-W><C-h>
-            "map <C-j> <C-W><C-j>
-            "map <C-k> <C-W><C-k>
-            "map <C-l> <C-W><C-l>
-            "nnoremap <C-J> <C-W><C-J>
-            "nnoremap <C-K> <C-W><C-K>
-            "nnoremap <C-L> <C-W><C-L>
-            "nnoremap <C-H> <C-W><C-H>
-        endif
-    endif
 
     " Wrapped lines goes down/up to next row, rather than next line in file.
     noremap j gj
@@ -695,6 +670,37 @@
         endfor
     endfunction
     call InitializeDirectories()
+    " }
+
+    " Central session store {
+    " Session files mirror the project path under a central directory, so
+    " nothing is written into the project itself. tmux-resurrect reads the
+    " same location via its 'central' strategy, linked in by install.sh.
+    " Run :ObsessionHere once per project to start tracking.
+    " Key on the git work tree rather than the cwd. The autochdir autocmd
+    " above moves vim's process cwd to the open file's directory, which is
+    " also what tmux records for the pane, so neither is stable. The work
+    " tree resolves the same from any subdirectory, so this and the
+    " tmux-resurrect strategy agree.
+    function! s:SessionKey() abort
+        let l:dir = getcwd()
+        let l:top = system('git -C ' . shellescape(l:dir) . ' rev-parse --show-toplevel 2>/dev/null')
+        let l:top = substitute(l:top, '\n', '', 'g')
+        return (v:shell_error == 0 && !empty(l:top)) ? l:top : l:dir
+    endfunction
+
+    function! s:SessionFile() abort
+        let l:root = empty($XDG_DATA_HOME) ? $HOME . '/.local/share' : $XDG_DATA_HOME
+        return l:root . '/nvim-sessions' . s:SessionKey() . '/Session.vim'
+    endfunction
+
+    function! s:ObsessionHere() abort
+        let l:file = s:SessionFile()
+        call mkdir(fnamemodify(l:file, ':h'), 'p')
+        execute 'Obsession' fnameescape(l:file)
+    endfunction
+
+    command! ObsessionHere call s:ObsessionHere()
     " }
 
     " Strip whitespace {
