@@ -219,6 +219,14 @@ check_requirements () {
       warn "Check Requirements : vim or nvim"
     fi
   fi
+  # lightline's separators and the ALE indicators need a patched font. The
+  # font belongs to whatever manages $HOME, so report on it rather than
+  # installing one here.
+  if fc-list 2>/dev/null | grep -qiE "powerline|nerd font"; then
+    success "Check Requirements: patched font"
+  else
+    warn "Check Requirements: no Powerline/Nerd font found; lightline separators and ALE glyphs will not render"
+  fi
   info "Checking true colors support in terminal:"
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/JohnMorales/dotfiles/master/colors/24-bit-color.sh)"
 }
