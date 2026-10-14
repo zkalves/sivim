@@ -25,10 +25,11 @@
         " Verilog plugins
         Plug 'vhda/verilog_systemverilog.vim'
 
-        " Yank/paste ring: Neovim gets the actively maintained Lua plugin,
-        " plain Vim falls back to nvim-miniyank (upstream unmaintained since
-        " 2019 but still functional for basic use)
-        if has('nvim')
+        " Yank/paste ring: Neovim 0.9+ gets the actively maintained Lua
+        " plugin, anything older falls back to nvim-miniyank (upstream
+        " unmaintained since 2019 but still functional for basic use).
+        let s:have_yanky = has('nvim-0.9')
+        if s:have_yanky
             Plug 'gbprod/yanky.nvim'
         else
             Plug 'bfredl/nvim-miniyank'
@@ -48,6 +49,10 @@
     if exists('g:sivim_no_easyWindows')
         let g:tmux_navigator_no_mappings = 1
     endif
+
+    " Write the buffer when leaving the pane, so a simulation launched in the
+    " neighbouring shell picks up the edit.
+    let g:tmux_navigator_save_on_switch = 1
 
     " Initialize plugin system
     call plug#end()
@@ -78,12 +83,35 @@
         endif
     endif
 
+    " On a login node reached over plain ssh there is no X display, so the
+    " usual xsel/xclip providers are unavailable. Route the registers through
+    " the tmux buffer instead; .tmux.conf has set-clipboard on, which forwards
+    " it to the local terminal over OSC 52.
+    if !empty($TMUX) && empty($DISPLAY) && executable('tmux')
+        let g:clipboard = {
+            \ 'name': 'tmux',
+            \ 'copy': {
+            \   '+': ['tmux', 'load-buffer', '-w', '-'],
+            \   '*': ['tmux', 'load-buffer', '-w', '-'],
+            \ },
+            \ 'paste': {
+            \   '+': ['tmux', 'save-buffer', '-'],
+            \   '*': ['tmux', 'save-buffer', '-'],
+            \ },
+            \ 'cache_enabled': 1,
+            \ }
+    endif
+
     " Most prefer to automatically switch to the current file directory when
     " a new buffer is opened; to prevent this behavior, add the following to
     " your ~/.sivim/config/init.before.vim file:
     "   let g:sivim_no_autochdir = 1
+    " The directory check keeps a jump to a path that no longer exists - a
+    " quickfix entry pointing into a cleaned build or scratch area - from
+    " aborting with E344 before the buffer is shown.
     if !exists('g:sivim_no_autochdir')
-        autocmd BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
+        autocmd BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" && isdirectory(expand('%:p:h'))
+            \ | silent! lcd %:p:h | endif
         " Always switch to the current file directory
     endif
 
@@ -91,7 +119,7 @@
     set shortmess+=filmnrxoOtT          " Abbrev. of messages (avoids 'hit enter')
     set viewoptions=folds,options,cursor,unix,slash " Better Unix / Windows compatibility
     set virtualedit=onemore             " Allow for cursor beyond last character
-    set spell                           " Spell checking on
+    set nospell                         " Spell checking on for prose only
     set hidden                          " Allow buffer switching without saving
     set iskeyword-=.                    " '.' is an end of word designator
     set iskeyword-=#                    " '#' is an end of word designator
@@ -119,6 +147,22 @@
             autocmd BufWinEnter * call ResCur()
         augroup END
     endif
+
+    " Spelling is noise in source, where every signal and type name is a
+    " miss. Enable it where the buffer really is prose.
+    augroup sivim_spell
+        autocmd!
+        autocmd FileType gitcommit,markdown,text,asciidoc,rst,mail setlocal spell
+    augroup END
+
+    " vim-sensible sets 'autoread', but nothing triggers the check. Inside
+    " tmux vim-tmux-focus-events delivers FocusGained, so a file regenerated
+    " by a flow step - a filelist, a generated CSR header, a sim output -
+    " reloads when the pane comes back.
+    augroup sivim_checktime
+        autocmd!
+        autocmd FocusGained,BufEnter * silent! checktime
+    augroup END
 
     " Ignore whitespaces for diff
     set diffopt+=iwhite
@@ -336,7 +380,7 @@
     vnoremap . :normal .<CR>
 
     " For when you forget to sudo.. Really Write the file.
-    cmap w!! w !sudo tee % >/dev/null
+    cnoremap w!! w !sudo tee % >/dev/null
 
     " Some helpers to edit mode
     " http://vimcasts.org/e/14
@@ -410,16 +454,30 @@
     " Disable F1 help
     nmap <F1> <nop>
 
-    " Yank/paste ring
-    if has('nvim')
-        map p <Plug>(YankyPutAfter)
-        map P <Plug>(YankyPutBefore)
-        nmap <c-n> <Plug>(YankyCycleForward)
-        nmap <c-p> <Plug>(YankyCycleBackward)
-    else
-        map p <Plug>(miniyank-autoput)
-        map P <Plug>(miniyank-autoPut)
-    endif
+    " Yank/paste ring. Bind only to a <Plug> target the plugin really
+    " defined, so a ring that is absent or failed to load falls back to
+    " plain p and P instead of leaving them as dead keys. Deferred to
+    " VimEnter because plugin files are sourced after this one.
+    function! s:MapYankRing() abort
+        if !empty(maparg('<Plug>(YankyPutAfter)', 'n'))
+            nmap p <Plug>(YankyPutAfter)
+            xmap p <Plug>(YankyPutAfter)
+            nmap P <Plug>(YankyPutBefore)
+            xmap P <Plug>(YankyPutBefore)
+            nmap <c-n> <Plug>(YankyCycleForward)
+            nmap <c-p> <Plug>(YankyCycleBackward)
+        elseif !empty(maparg('<Plug>(miniyank-autoput)', 'n'))
+            nmap p <Plug>(miniyank-autoput)
+            xmap p <Plug>(miniyank-autoput)
+            nmap P <Plug>(miniyank-autoPut)
+            xmap P <Plug>(miniyank-autoPut)
+        endif
+    endfunction
+
+    augroup sivim_yank_ring
+        autocmd!
+        autocmd VimEnter * call s:MapYankRing()
+    augroup END
 
     " Trim whitespaces
     nmap <leader>w :call StripTrailingWhitespace()<CR>
@@ -506,12 +564,24 @@
         " unresolved modules, packages or includes that live in other
         " directories. Override with g:sivim_verilog_linters in
         " ~/.sivim/config/init.before.vim.
+        "
+        " ALE ships ghdl, xvhdl, vcom and hdl_checker for VHDL and would run
+        " every one it finds; name the one the project actually uses.
         let s:verilog_linters = get(g:, 'sivim_verilog_linters', ['verible_ls'])
         let g:ale_linters = {
             \   'python': ['flake8', 'pylint'],
             \   'verilog': s:verilog_linters,
             \   'systemverilog': s:verilog_linters,
             \   'verilog_systemverilog': s:verilog_linters,
+            \   'vhdl': get(g:, 'sivim_vhdl_linters', ['ghdl']),
+            \ }
+
+        " Formatting stays on demand (:ALEFix) rather than on save, so it
+        " cannot reformat a shared repository against its own house style.
+        let g:ale_fixers = {
+            \   'verilog': ['verible_format'],
+            \   'systemverilog': ['verible_format'],
+            \   'verilog_systemverilog': ['verible_format'],
             \ }
 
         " lightline-ale: show ALE status in the statusline
@@ -578,8 +648,62 @@
             \ }
     " }
 
+    " Verilog / SystemVerilog {
+        " verilog_systemverilog.vim's syntax folding is opt-in. With no fold
+        " list 'foldmethod=syntax' produces no folds at all, leaving <space>
+        " and the <leader>f0-f9 level mappings inert in the filetype they are
+        " most wanted in.
+        let g:verilog_syntax_fold_lst = get(g:, 'sivim_verilog_fold_lst', 'all')
+
+        " Hierarchy navigation. Following an instance needs a tags file built
+        " with universal-ctags.
+        augroup sivim_verilog_maps
+            autocmd!
+            autocmd FileType verilog_systemverilog
+                \ nnoremap <buffer> <LocalLeader>fi :VerilogFollowInstance<CR>
+                \|nnoremap <buffer> <LocalLeader>fp :VerilogFollowPort<CR>
+                \|nnoremap <buffer> <LocalLeader>fr :VerilogReturnInstance<CR>
+                \|nnoremap <buffer> <LocalLeader>gi :VerilogGotoInstanceStart<CR>
+        augroup END
+
+        " Simulation logs into the quickfix list. The compiler plugins
+        " shipped with verilog_systemverilog.vim supply each tool's
+        " errorformat, and verilog_common.vim appends the UVM report
+        " patterns, so :cn / :cp step from UVM_ERROR straight to the line
+        " that reported it instead of grepping the log by hand.
+        let g:verilog_efm_uvm_lst = get(g:, 'sivim_verilog_efm_uvm_lst', 'all')
+        let g:verilog_efm_quickfix_clean = 1
+
+        " :SimLog sim.log         read with g:sivim_simulator (default ncverilog)
+        " :SimLog vcs sim.log     name the compiler explicitly
+        function! s:SimLog(...) abort
+            let l:compiler = get(g:, 'sivim_simulator', 'ncverilog')
+            let l:args = copy(a:000)
+
+            " A leading argument that is not a path names the compiler.
+            if len(l:args) > 1 && !filereadable(expand(l:args[0]))
+                let l:compiler = remove(l:args, 0)
+            endif
+
+            let l:log = expand(join(l:args, ' '))
+
+            if !filereadable(l:log)
+                echohl WarningMsg
+                echomsg 'SimLog: cannot read ' . l:log
+                echohl None
+                return
+            endif
+
+            execute 'compiler!' l:compiler
+            execute 'cfile' fnameescape(l:log)
+            copen
+        endfunction
+
+        command! -nargs=+ -complete=file SimLog call s:SimLog(<f-args>)
+    " }
+
     " Yank/paste ring {
-        if has('nvim')
+        if s:have_yanky
             lua pcall(function() require('yanky').setup() end)
         endif
     " }
@@ -675,7 +799,10 @@
     " Central session store {
     " Session files mirror the project path under a central directory, so
     " nothing is written into the project itself. tmux-resurrect reads the
-    " same location via its 'central' strategy, linked in by install.sh.
+    " same location via its 'central' strategy, which lives in the dotfiles
+    " repository (lib/tmux-resurrect-central.sh) because that is what owns
+    " tmux and installs the plugin. Keep the path convention below in step
+    " with that script.
     " Run :ObsessionHere once per project to start tracking.
     " Key on the git work tree rather than the cwd. The autochdir autocmd
     " above moves vim's process cwd to the open file's directory, which is
