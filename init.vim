@@ -7,7 +7,7 @@
 "" Plugin manager {
     call plug#begin('~/.sivim/plugged')
 "        " Declare the list of plugins.
-        Plug 'altercation/vim-colors-solarized'    " Default colorscheme
+        Plug 'lifepillar/vim-solarized8'           " Default colorscheme
         Plug 'godlygeek/tabular'                   " Text alignment
         Plug 'nathanaelkane/vim-indent-guides'     " Visually display indent levels
         Plug 'tmhedberg/SimpylFold'                " Code folding for python
@@ -717,8 +717,9 @@
 " Vim UI {
 
     " Set colorscheme {
+        set termguicolors
         set background=dark
-        colorscheme solarized
+        colorscheme solarized8
     " }
 
     set cursorline                  " Highlight current line
